@@ -6,6 +6,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import UserProvider from "./UserContext";
 import RequireAuth from "./RequireAuth";
 import HomePage from "./HomePage";
+import Create from "./Create";
+
 const App = () => {
   return (
     <UserProvider>
@@ -21,6 +23,7 @@ const App = () => {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/create" element={<Create />} />
         </Routes>
       </BrowserRouter>
     </UserProvider>
