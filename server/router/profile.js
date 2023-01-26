@@ -8,10 +8,10 @@ const router = new express.Router();
 router.get('/profiles', async (req,res) => {
     try {
         const profiles = await Profile.find();
-        res.json(profiles)
+        return res.json(profiles)
     } catch(err) {
         console.log(`Exception caught --------> ${err}`)
-        res.status(500).send(err);
+        return res.status(500).send(err);
     }
 })
 
@@ -21,31 +21,32 @@ router.post('/signup', async (req,res) => {
     try {
         const profile = new Profile(req.body);
         await profile.save();
-        res.status(201).json(profile);
+        return res.status(201).json({"type": "SUCCESS","message":"Voter registered"})
     } catch(e) {
         console.log(`Exception caught --------> ${e}`)
-        res.status(500).send(e);
+        return res.status(500).send(e);
     }
 })
 
 //To authenticate a user
 router.post('/login', async (req,res) => {
     try {
-        console.log(req.body)
         if(req.body.username && req.body.password) {
             const profileObj = await Profile.findOne(req.body);
             console.log(profileObj);
             if(profileObj && profileObj.password === req.body.password) {
                 console.log("Successfully Authenticated")
-                res.status(201).send()
+                return res.status(200).json({"type": "SUCCESS","message":"User logged in"})
             } else {
                 console.log("Incorrect password")
-                res.status(400).send()
+                return res.status(400).json({"type": "ERROR","message":"Bad Request"})
             }
+        } else {
+            return res.status(400).json({"type": "ERROR","message":"Bad Request"})
         }
-    } catch(e) {
-        console.log(`Exception caught --------> ${e}`)
-        res.status(500).send(e);
+    } catch(err) {
+        console.log(`Exception caught --------> ${err}`)
+        return res.status(500).send(err);
     }
 })
 

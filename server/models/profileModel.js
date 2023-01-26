@@ -13,7 +13,11 @@ const profileSchema = mongoose.Schema (
         profileId : {
             type: String,
             required: true
-        }
+        },
+         name: {
+            type: String,
+            required: true
+        },
     }, {
         timestamps: true,
     }

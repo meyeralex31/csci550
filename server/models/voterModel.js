@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 
 const voterSchema = mongoose.Schema (
     {   
-        voterName: {
-            type: String,
-            required: true
-        }, 
         hasVoted : {
             type: Boolean,
             required: true
