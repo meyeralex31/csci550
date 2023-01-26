@@ -33,12 +33,10 @@ router.post('/login', async (req,res) => {
     try {
         if(req.body.username && req.body.password) {
             const profileObj = await Profile.findOne(req.body);
-            console.log(profileObj);
             if(profileObj && profileObj.password === req.body.password) {
                 console.log("Successfully Authenticated")
                 return res.status(200).json({"type": "SUCCESS","message":"User logged in"})
             } else {
-                console.log("Incorrect password")
                 return res.status(400).json({"type": "ERROR","message":"Bad Request"})
             }
         } else {
