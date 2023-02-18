@@ -7,6 +7,8 @@ import UserProvider from "./UserContext";
 import RequireAuth from "./RequireAuth";
 import HomePage from "./HomePage";
 import Create from "./Create";
+import RegisterElectionPage from "./RegisterElectionPage/RegisterElectionPage";
+import StartElection from "./RegisterElectionPage/StartElection";
 
 const App = () => {
   return (
@@ -24,6 +26,8 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/create" element={<Create />} />
+          <Route path="/registerElection" element={<RegisterElectionPage />} />
+          <Route path="/startElection" element={<StartElection />} />
         </Routes>
       </BrowserRouter>
     </UserProvider>
