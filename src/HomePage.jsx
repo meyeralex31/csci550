@@ -8,7 +8,6 @@ import GroupIcon from "@mui/icons-material/Group";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import KeyIcon from "@mui/icons-material/Key";
 import { useNavigate } from "react-router-dom";
-
 const HomePage = () => {
   const { userName } = useUser();
   const navigate = useNavigate();
@@ -48,7 +47,7 @@ const HomePage = () => {
               </ButtonCard>
               <ButtonCard
                 onClick={() => {
-                  console.log("Public Elections");
+                  navigate("/publicElection");
                 }}
               >
                 <GroupIcon /> <span>Public Elections</span>

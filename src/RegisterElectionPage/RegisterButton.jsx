@@ -2,8 +2,11 @@ import Button from "@mui/material/Button";
 import ClearIcon from "@mui/icons-material/Clear";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
-const RegisterButton = () => {
-  const registered = true;
+const RegisterButton = ({
+  disabled = false,
+  registered = false,
+  onClick = () => {},
+}) => {
   const style = { marginRight: "auto", marginLeft: "auto" };
   if (registered) {
     return (
@@ -12,6 +15,8 @@ const RegisterButton = () => {
         sx={style}
         variant="contained"
         color="error"
+        disabled={disabled}
+        onClick={onClick}
       >
         Unregister
       </Button>
@@ -23,6 +28,8 @@ const RegisterButton = () => {
         sx={style}
         variant="contained"
         color="info"
+        disabled={disabled}
+        onClick={onClick}
       >
         Register
       </Button>
