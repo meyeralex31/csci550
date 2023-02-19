@@ -3,7 +3,6 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
-import AccountCircle from "@mui/icons-material/AccountCircle";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
@@ -63,7 +62,7 @@ const Create = () => {
                 </FormGroup>
               </Grid>
               {questions.map((questionObject, questionIndex) => (
-                <React.Fragment key={questionObject.question}>
+                <React.Fragment key={questionIndex}>
                   <Grid item xs={12}>
                     <TextField
                       //  TODO make the first required
@@ -92,8 +91,8 @@ const Create = () => {
                     />
                   </Grid>
                   {questionObject.options?.map((option, index) => (
-                    <React.Fragment key={option}>
-                      <Grid key={option} item xs={5.75}>
+                    <React.Fragment key={`${questionIndex}-${index}`}>
+                      <Grid item xs={5.75}>
                         <TextField
                           //  TODO make the first required
                           required
