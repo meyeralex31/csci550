@@ -13,7 +13,7 @@ const UserProvider = ({ children }) => {
     return !!userName;
   };
   return (
-    <UserContext.Provider value={{ signIn, signOut, isSignedIn }}>
+    <UserContext.Provider value={{ signIn, signOut, isSignedIn, userName }}>
       {children}
     </UserContext.Provider>
   );

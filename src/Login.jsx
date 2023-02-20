@@ -9,7 +9,6 @@ import LoginIcon from "@mui/icons-material/Login";
 import Grid from "@mui/material/Grid";
 import { useNavigate, Link } from "react-router-dom";
 import { useUser } from "./UserContext";
-
 const Login = () => {
   const navigate = useNavigate();
 
