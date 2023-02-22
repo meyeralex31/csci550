@@ -14,9 +14,9 @@ import Button from "@mui/material/Button";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import DoneIcon from "@mui/icons-material/Done";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
-const REGISTRATION_STATUS = "Registeration Open";
-const VOTING_IN_PROGRESS_STATUS = "Voting Started";
-const VOTING_ENDED_STATUS = "Voting Ended";
+export const REGISTRATION_STATUS = "Registeration Open";
+export const VOTING_IN_PROGRESS_STATUS = "Voting Started";
+export const VOTING_ENDED_STATUS = "Voting Ended";
 
 const PublicElection = () => {
   const nonbuttonstyle = {
@@ -111,10 +111,10 @@ const PublicElection = () => {
                     </TableCell>
                     <TableCell align="center">
                       <RegisterButton
-                        disabled={
-                          row.status !== REGISTRATION_STATUS || !row.public
-                        }
+                        disabled={!row.public}
+                        status={row.status}
                         onClick={() => navigate("/registerElection")}
+                        registered={true}
                       />
                     </TableCell>
                   </TableRow>
