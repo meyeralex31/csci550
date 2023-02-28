@@ -4,9 +4,19 @@ import Paper from "@mui/material/Paper";
 import Status from "./Status";
 import Questions from "./Questions";
 import RegisterButton from "./RegisterButton";
+import {
+  REGISTRATION_STATUS,
+  VOTING_IN_PROGRESS_STATUS,
+  VOTING_ENDED_STATUS,
+} from "../PublicElectionPage";
+import { useNavigate } from "react-router-dom";
 
 const RegisterElectionPage = () => {
   const title = "Title";
+  const status = REGISTRATION_STATUS;
+  const registered = true;
+  const navigate = useNavigate();
+
   return (
     <div
       style={{
@@ -43,7 +53,17 @@ const RegisterElectionPage = () => {
                   marginTop: "10px",
                 }}
               >
-                <RegisterButton />
+                <RegisterButton
+                  status={status}
+                  registered={registered}
+                  onClick={() => {
+                    if (status === REGISTRATION_STATUS) {
+                      console.log("registration status changed");
+                    } else if (status === VOTING_IN_PROGRESS_STATUS) {
+                      navigate("/VotingPage");
+                    }
+                  }}
+                />
               </Grid>
             </Grid>
           </Paper>
