@@ -13,11 +13,21 @@ import Collectors from "./Collectors";
 import RegisterVoters from "./RegisteredVoters";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StartVotingModal from "./StartVotingModal";
+import {
+  REGISTRATION_STATUS,
+  VOTING_IN_PROGRESS_STATUS,
+  VOTING_ENDED_STATUS,
+} from "../PublicElectionPage";
+import { useNavigate } from "react-router-dom";
 
 const StartElection = () => {
   const title = "Title";
+  const registered = true;
+  const status = VOTING_IN_PROGRESS_STATUS;
   const [tabValue, setTabValue] = useState(0);
   const [startElectionModalOpen, setStartElectionModalOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <div
       style={{
@@ -90,27 +100,39 @@ const StartElection = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <RegisterButton />
+                  <RegisterButton
+                    registered={registered}
+                    status={status}
+                    onClick={() => {
+                      if (status === REGISTRATION_STATUS) {
+                        console.log("registration status changed");
+                      } else if (status === VOTING_IN_PROGRESS_STATUS) {
+                        navigate("/VotingPage");
+                      }
+                    }}
+                  />
                 </Grid>
-                <Grid
-                  item
-                  xs={6}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Button
-                    startIcon={<PlayArrowIcon />}
-                    style={{ marginRight: "auto", marginLeft: "auto" }}
-                    variant="contained"
-                    color="info"
-                    onClick={() => setStartElectionModalOpen(true)}
+                {status === REGISTRATION_STATUS && (
+                  <Grid
+                    item
+                    xs={6}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    Open Voting
-                  </Button>
-                </Grid>
+                    <Button
+                      startIcon={<PlayArrowIcon />}
+                      style={{ marginRight: "auto", marginLeft: "auto" }}
+                      variant="contained"
+                      color="info"
+                      onClick={() => setStartElectionModalOpen(true)}
+                    >
+                      Open Voting
+                    </Button>
+                  </Grid>
+                )}
               </Grid>
             </Grid>
           </Paper>

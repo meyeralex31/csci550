@@ -9,6 +9,8 @@ import HomePage from "./HomePage";
 import Create from "./Create";
 import RegisterElectionPage from "./RegisterElectionPage/RegisterElectionPage";
 import StartElection from "./RegisterElectionPage/StartElection";
+import PublicElection from "./PublicElectionPage";
+import VotingPage from "./VotingPage";
 
 const App = () => {
   return (
@@ -28,6 +30,8 @@ const App = () => {
           <Route path="/create" element={<Create />} />
           <Route path="/registerElection" element={<RegisterElectionPage />} />
           <Route path="/startElection" element={<StartElection />} />
+          <Route path="/publicElection" element={<PublicElection />} />
+          <Route path="/votingPage" element={<VotingPage />} />
         </Routes>
       </BrowserRouter>
     </UserProvider>
