@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 const RegisterElectionPage = () => {
   const title = "Title";
-  const status = REGISTRATION_STATUS;
+  const status = VOTING_ENDED_STATUS;
   const registered = true;
   const navigate = useNavigate();
 
@@ -33,7 +33,7 @@ const RegisterElectionPage = () => {
           <Paper>
             <Grid container style={{ padding: "10px" }}>
               <Grid item xs={5} style={{ borderRight: "1px solid grey" }}>
-                <Status />
+                <Status status={status} />
               </Grid>
               <Grid
                 item
@@ -61,6 +61,8 @@ const RegisterElectionPage = () => {
                       console.log("registration status changed");
                     } else if (status === VOTING_IN_PROGRESS_STATUS) {
                       navigate("/VotingPage");
+                    } else if (status === VOTING_ENDED_STATUS) {
+                      navigate("/results");
                     }
                   }}
                 />

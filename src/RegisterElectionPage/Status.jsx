@@ -6,9 +6,9 @@ import CheckIcon from "@mui/icons-material/Check";
 import AssignmentLateIcon from "@mui/icons-material/AssignmentLate";
 import WarningIcon from "@mui/icons-material/Warning";
 import PublicPrivateButton from "./PublicPrivateButton";
-const Status = () => {
+import { REGISTRATION_STATUS } from "../PublicElectionPage";
+const Status = ({ status }) => {
   const publicElection = false;
-  const openForRegisteration = true;
   const registered = true;
 
   const buttonstyle = {
@@ -17,7 +17,7 @@ const Status = () => {
     pointerEvents: "none",
   };
   const getStatusButton = () => {
-    if (openForRegisteration) {
+    if (status === REGISTRATION_STATUS) {
       return (
         <Button
           style={buttonstyle}

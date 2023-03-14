@@ -11,7 +11,7 @@ import RegisterElectionPage from "./RegisterElectionPage/RegisterElectionPage";
 import StartElection from "./RegisterElectionPage/StartElection";
 import PublicElection from "./PublicElectionPage";
 import VotingPage from "./VotingPage";
-
+import Results from "./Results/Results";
 const App = () => {
   return (
     <UserProvider>
@@ -32,6 +32,7 @@ const App = () => {
           <Route path="/startElection" element={<StartElection />} />
           <Route path="/publicElection" element={<PublicElection />} />
           <Route path="/votingPage" element={<VotingPage />} />
+          <Route path="/results" element={<Results />} />
         </Routes>
       </BrowserRouter>
     </UserProvider>
