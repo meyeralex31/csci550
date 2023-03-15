@@ -1,10 +1,12 @@
 const express = require('express')
+const cors = require('cors')
 
 const app = express()
 
 const connectDB = require('./db/mongoose');
 const profileRouter = require('../server/router/profile')
 app.use(express.json());
+app.use(cors())
 
 // To establish a MongoDB connection
 connectDB()
