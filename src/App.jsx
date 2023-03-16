@@ -27,12 +27,54 @@ const App = () => {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/create" element={<Create />} />
-          <Route path="/registerElection" element={<RegisterElectionPage />} />
-          <Route path="/startElection" element={<StartElection />} />
-          <Route path="/publicElection" element={<PublicElection />} />
-          <Route path="/votingPage" element={<VotingPage />} />
-          <Route path="/results" element={<Results />} />
+          <Route
+            path="/create"
+            element={
+              <RequireAuth>
+                <Create />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/registerElection"
+            element={
+              <RequireAuth>
+                <RegisterElectionPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/startElection"
+            element={
+              <RequireAuth>
+                <StartElection />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/publicElection"
+            element={
+              <RequireAuth>
+                <PublicElection />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/votingPage"
+            element={
+              <RequireAuth>
+                <VotingPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/results"
+            element={
+              <RequireAuth>
+                <Results />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </UserProvider>
