@@ -2,33 +2,55 @@ const election = [
     {
     "questions":[{
         "question":"What is your name",
-    }],
-    "options":[{
-        "option" : "Yes",
-        "option" : "No bruh",
-        "option" : "Yea",
+        "options":[{
+            "option" : "Eashwar",
+            }, {
+            "option" : "Alex",
+            }, {
+            "option" : "Rishik",
+            }]
     }],
     "electionTitle" : "Test Election 1",
-    "collectors":[{
+    "REGISTRATION_STATUS" : "Registeration Open",
+    "adminProfileId":"12334",
+    "collectors":[
+        {
         "collector":"California",
+        "id" : "CA" 
+        }, {
         "collector": "Texas",
-        "collector":"Indianapolis"
-    }],
+        "id":"TA"
+        }, {
+        "collector":"Indianapolis",
+        "id":"IN"
+        },
+    ],
  }, {
     "questions":[{
-        "question":"What is Eashwar's name",
-    }],
-    "options":[{
-        "option" : "Yes",
-        "option" : "No bruh",
-        "option" : "Yea",
+        "question":"What framework or library do you use",
+        "options":[{
+            "option" : "React JS",
+            }, {
+            "option" : "Node JS",
+            }, {
+            "option" : "Typescript JS",
+            }]
     }],
     "electionTitle" : "Test Election 2",
-    "collectors":[{
+    "REGISTRATION_STATUS" : "Voting Started",
+    "adminProfileId":"12334",
+    "collectors":[
+        {
         "collector":"California",
+        "id" : "CA" 
+        }, {
         "collector": "Texas",
-        "collector":"Indianapolis"
-    }],
+        "id":"TA"
+        }, {
+        "collector":"Indianapolis",
+        "id":"IN"
+        },
+    ],
 },
 ]
 

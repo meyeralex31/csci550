@@ -18,46 +18,34 @@ const electionSchema = mongoose.Schema (
                 type: String,
                 required: true
             },
+            options: [ {
+                option : {
+                    type: String,
+                    required: true
+                },
             questionId: mongoose.Schema.Types.ObjectId,
      }],
-        options: [ {
-            option : {
-                type: String,
-                // required: true
-            },
+        
     }],
     electionTitle: {
         type: String,
+        required: true
     },
         REGISTRATION_STATUS : {
             type: String,
             // required: true
         },
-        VOTING_IN_PROGRESS_STATUS : {
+        adminProfileId : {
             type: String,
-            // required: true
-        },
-        VOTING_ENDED_STATUS : {
-            type: String,
-            // required: true
+            required: true
         },
         collectors: [ {
             collector : {
                 type: String,
-                // required: true
+                required: true
             },
             collectorId: mongoose.Schema.Types.ObjectId,
      }],
-
-
-        // options : [
-        //     {
-        //         option: {
-        //             type: String,
-        //             required: true
-        //         }
-        //     }
-        // ]
     }, {
         timestamps: true,
     }
