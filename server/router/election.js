@@ -16,6 +16,17 @@ const router = new express.Router();
         }
     })
 
+//Display available Elections
+    router.post('/displayElections', async (req,res) => {
+        try {
+            const Elections = await Election.find({}, { electionTitle : 1 , REGISTRATION_STATUS : 1 });
+            return res.json(Elections)
+        } catch(e) {
+            console.log(`Exception caught --------> ${e}`)
+            return res.status(500).send(e);
+        }
+    })
+
 
 
 module.exports = router;
