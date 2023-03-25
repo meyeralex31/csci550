@@ -13,6 +13,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+
   const { signIn } = useUser();
   return (
     <div
@@ -60,16 +62,25 @@ const Login = () => {
                       </InputAdornment>
                     ),
                   }}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
                 <Button
+                  disabled={!userName || !password}
                   style={{ width: "100%" }}
                   variant="contained"
                   startIcon={<LoginIcon />}
-                  onClick={() => {
-                    signIn(userName);
-                    navigate("/");
+                  onClick={async () => {
+                    await signIn(userName, password)
+                      .then(() => {
+                        navigate("/");
+                      })
+                      .catch((e) => {
+                        alert("Failed to login: " + e.message);
+                      });
                   }}
                 >
                   Login

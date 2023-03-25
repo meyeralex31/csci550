@@ -35,7 +35,7 @@ router.post('/login', async (req,res) => {
             const profileObj = await Profile.findOne(req.body);
             if(profileObj && profileObj.password === req.body.password) {
                 console.log("Successfully Authenticated")
-                return res.status(200).json({"type": "SUCCESS","message":"User logged in"})
+                return res.status(200).json({"type": "SUCCESS","message":"User logged in", profileId: profileObj.profileId})
             } else {
                 return res.status(400).json({"type": "ERROR","message":"Bad Request"})
             }
