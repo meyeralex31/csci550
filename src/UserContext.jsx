@@ -47,7 +47,6 @@ const UserProvider = ({ children }) => {
         username,
         name,
         password,
-        profileId: Math.random() * 1000,
       })
       .then((res) => {
         setUserName(userName);
