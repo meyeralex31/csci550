@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -8,11 +8,17 @@ import Button from "@mui/material/Button";
 import PersonIcon from "@mui/icons-material/Person";
 import CreateIcon from "@mui/icons-material/Create";
 import { useNavigate } from "react-router-dom";
-
+import { useUser } from "./UserContext";
 import Grid from "@mui/material/Grid";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [name, setName] = useState();
+  const [password, setPassword] = useState();
+  const [secondPassword, setSecondPassword] = useState();
+  const [username, setUserName] = useState();
+  const { register } = useUser();
+  const passwordMatches = password === secondPassword;
   return (
     <div
       style={{
@@ -41,6 +47,9 @@ const Register = () => {
                       </InputAdornment>
                     ),
                   }}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -55,6 +64,9 @@ const Register = () => {
                         <AccountCircle />
                       </InputAdornment>
                     ),
+                  }}
+                  onChange={(e) => {
+                    setUserName(e.target.value);
                   }}
                 />
               </Grid>
@@ -73,6 +85,9 @@ const Register = () => {
                       </InputAdornment>
                     ),
                   }}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -89,15 +104,27 @@ const Register = () => {
                       </InputAdornment>
                     ),
                   }}
+                  error={!passwordMatches}
+                  helperText={!passwordMatches ? "Passwords Must Match" : ""}
+                  onChange={(e) => {
+                    setSecondPassword(e.target.value);
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
                 <Button
+                  disabled={!username || !password || !name || !passwordMatches}
                   style={{ width: "100%" }}
                   variant="contained"
                   startIcon={<CreateIcon />}
-                  onClick={() => {
-                    navigate("/login");
+                  onClick={async () => {
+                    await register(username, password, name)
+                      .then(() => {
+                        navigate("/login");
+                      })
+                      .catch((e) => {
+                        alert("Failed to register: " + e.message);
+                      });
                   }}
                 >
                   Register

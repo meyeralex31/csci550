@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 
 const app = express()
 
@@ -9,6 +10,7 @@ const voterRouter = require('../server/router/voter')
 const electionRouter = require('../server/router/election')
 
 app.use(express.json());
+app.use(cors())
 
 // To establish a MongoDB connection
 connectDB()
