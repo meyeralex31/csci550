@@ -18,14 +18,13 @@ const electionSchema = mongoose.Schema (
                 type: String,
                 required: true
             },
+            questionId: mongoose.Schema.Types.ObjectId,
             options: [ {
                 option : {
                     type: String,
                     required: true
                 },
-            questionId: mongoose.Schema.Types.ObjectId,
      }],
-        
     }],
     electionTitle: {
         type: String,
