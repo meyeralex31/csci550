@@ -19,6 +19,8 @@ import {
   VOTING_ENDED_STATUS,
 } from "../PublicElectionPage";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../UserContext";
+import axios from "axios";
 
 const StartElection = () => {
   const title = "Title";
@@ -27,6 +29,7 @@ const StartElection = () => {
   const [tabValue, setTabValue] = useState(0);
   const [startElectionModalOpen, setStartElectionModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { profileId } = useUser();
 
   return (
     <div
@@ -42,7 +45,15 @@ const StartElection = () => {
           setStartElectionModalOpen(false);
         }}
         startVoting={() => {
-          console.log("started to vote");
+          axios
+            .put("http://localhost:8080/updateElection", {
+              REGISTRATION_STATUS: VOTING_IN_PROGRESS_STATUS,
+              profileId,
+            })
+            .then(() => {
+              // navigate("/startElection");
+            })
+            .catch((e) => console.error(e));
           setStartElectionModalOpen(false);
         }}
       />

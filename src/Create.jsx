@@ -13,12 +13,17 @@ import TitleIcon from "@mui/icons-material/Title";
 import CircleIcon from "@mui/icons-material/Circle";
 import SaveAsIcon from "@mui/icons-material/SaveAs";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { REGISTRATION_STATUS } from "./PublicElectionPage";
+import { useUser } from "./UserContext";
 
 const Create = () => {
   // structure {question: string, options: string[]}
   const [questions, setQuestions] = useState([
     { question: "", options: ["", ""] },
   ]);
+  const { profileId } = useUser();
+  const [title, setTitle] = useState("");
 
   const navigate = useNavigate();
 
@@ -50,6 +55,10 @@ const Create = () => {
                       </InputAdornment>
                     ),
                   }}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                  }}
+                  value={title}
                 />
               </Grid>
               <Grid item xs={1}></Grid>
@@ -90,11 +99,10 @@ const Create = () => {
                       }}
                     />
                   </Grid>
-                  {questionObject.options?.map((option, index) => (
+                  {questionObject.options?.map(({ option }, index) => (
                     <React.Fragment key={`${questionIndex}-${index}`}>
                       <Grid item xs={5.75}>
                         <TextField
-                          //  TODO make the first required
                           required
                           fullWidth
                           id="outlined-required"
@@ -110,8 +118,9 @@ const Create = () => {
                           value={option}
                           onChange={(event) => {
                             setQuestions((prev) => {
-                              prev[questionIndex].options[index] =
-                                event.target.value;
+                              prev[questionIndex].options[index] = {
+                                option: event.target.value,
+                              };
                               return [...prev];
                             });
                           }}
@@ -148,7 +157,10 @@ const Create = () => {
                   onClick={() =>
                     setQuestions((prev) => [
                       ...prev,
-                      { question: "", options: ["", ""] },
+                      {
+                        question: "",
+                        options: [{ option: "" }, { option: "" }],
+                      },
                     ])
                   }
                 >
@@ -159,9 +171,27 @@ const Create = () => {
                 <Button
                   style={{ width: "100%", marginTop: "15px" }}
                   variant="contained"
+                  disabled={
+                    !title ||
+                    !questions?.[0]?.question ||
+                    !(
+                      questions?.[0]?.options?.[0] &&
+                      questions?.[0]?.options?.[1]
+                    )
+                  }
                   startIcon={<SaveAsIcon />}
                   onClick={() => {
-                    navigate("/startElection");
+                    axios
+                      .post("http://localhost:8080/createElection", {
+                        questions,
+                        electionTitle: title,
+                        REGISTRATION_STATUS,
+                        adminProfileId: profileId,
+                      })
+                      .then(() => {
+                        navigate("/startElection");
+                      })
+                      .catch((e) => console.error(e));
                   }}
                 >
                   Create Draft

@@ -11,7 +11,7 @@ import {
 
 const RegisterButton = ({
   disabled = false,
-  registered = true,
+  registered,
   onClick = () => {},
   status = REGISTRATION_STATUS,
 }) => {
