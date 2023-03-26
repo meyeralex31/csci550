@@ -133,7 +133,9 @@ const PublicElection = () => {
                       <RegisterButton
                         disabled={!row.public}
                         status={row.REGISTRATION_STATUS}
-                        onClick={() => navigate("/registerElection")}
+                        onClick={() =>
+                          navigate("/registerElection?id=" + row._id)
+                        }
                         registered={row.registered}
                       />
                     </TableCell>

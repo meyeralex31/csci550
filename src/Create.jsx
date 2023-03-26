@@ -188,8 +188,8 @@ const Create = () => {
                         REGISTRATION_STATUS,
                         adminProfileId: profileId,
                       })
-                      .then(() => {
-                        navigate("/startElection");
+                      .then((res) => {
+                        navigate("/startElection?id=" + res.data.id);
                       })
                       .catch((e) => console.error(e));
                   }}

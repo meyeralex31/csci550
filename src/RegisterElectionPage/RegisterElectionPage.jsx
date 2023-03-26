@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Status from "./Status";
@@ -10,12 +10,21 @@ import {
   VOTING_ENDED_STATUS,
 } from "../PublicElectionPage";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const RegisterElectionPage = () => {
   const title = "Title";
   const status = VOTING_ENDED_STATUS;
   const registered = true;
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!searchParams.get("id")) {
+      alert("No election id given returning to home page");
+      navigate("/");
+    }
+  }, []);
 
   return (
     <div
@@ -60,9 +69,9 @@ const RegisterElectionPage = () => {
                     if (status === REGISTRATION_STATUS) {
                       console.log("registration status changed");
                     } else if (status === VOTING_IN_PROGRESS_STATUS) {
-                      navigate("/VotingPage");
+                      navigate("/VotingPage?id=" + searchParams.get("id"));
                     } else if (status === VOTING_ENDED_STATUS) {
-                      navigate("/results");
+                      navigate("/results?id=" + searchParams.get("id"));
                     }
                   }}
                 />

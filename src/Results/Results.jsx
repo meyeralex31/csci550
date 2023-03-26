@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
+import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const Results = () => {
   const title = "Title";
@@ -129,6 +131,16 @@ const Results = () => {
       ],
     },
   ];
+  const navigate = useNavigate();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!searchParams.get("id")) {
+      alert("No election id given returning to home page");
+      navigate("/");
+    }
+  }, []);
   return (
     <div
       style={{

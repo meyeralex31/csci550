@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Tabs from "@mui/material/Tabs";
@@ -21,6 +21,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 
 const StartElection = () => {
   const title = "Title";
@@ -30,7 +31,14 @@ const StartElection = () => {
   const [startElectionModalOpen, setStartElectionModalOpen] = useState(false);
   const navigate = useNavigate();
   const { profileId } = useUser();
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  useEffect(() => {
+    if (!searchParams.get("id")) {
+      alert("No election id given returning to home page");
+      navigate("/");
+    }
+  }, []);
   return (
     <div
       style={{
@@ -118,7 +126,7 @@ const StartElection = () => {
                       if (status === REGISTRATION_STATUS) {
                         console.log("registration status changed");
                       } else if (status === VOTING_IN_PROGRESS_STATUS) {
-                        navigate("/VotingPage");
+                        navigate("/VotingPage?id=" + searchParams.get("id"));
                       }
                     }}
                   />
