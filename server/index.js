@@ -8,6 +8,7 @@ const connectDB = require('./db/mongoose');
 const profileRouter = require('../server/router/profile')
 const voterRouter = require('../server/router/voter')
 const electionRouter = require('../server/router/election')
+const collectorRouter = require('../server/router/collector')
 
 app.use(express.json());
 app.use(cors())
@@ -20,6 +21,7 @@ const port = process.env.PORT || 8080;
 app.use(profileRouter)
 app.use(voterRouter)
 app.use(electionRouter)
+app.use(collectorRouter)
 
 app.get('/', (req, res) => {
   res.send('Hello World!')

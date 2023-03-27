@@ -31,6 +31,19 @@ router.post('/getVoterDtls', async (req,res) => {
     }
 })
 
+router.post('/registerVoter', async (req,res) => {
+    try {
+        const  { electionId } = req.body;
+        if(!electionId) {
+            return res.status(400).json("Bad Request");
+        }
+        await Voter.findOneAndUpdate( { electionId }, {hasRegistered, collectors});
+    } catch (e) {
+        console.log(`Exception caught --------> ${err}`)
+        return res.status(500).send(err);
+    }
+})
+
 
 
 module.exports = router;

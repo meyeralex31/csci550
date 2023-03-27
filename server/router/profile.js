@@ -32,6 +32,7 @@ router.post('/signup', async (req,res) => {
 })
 
 //To authenticate a user
+//Pass to encrypted later
 router.post('/login', async (req,res) => {
     try {
         if(req.body.username && req.body.password) {

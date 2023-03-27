@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 // array of collector ids
 // electionCreatorProfileId
 
+// Election Id to be present in schema
 const electionSchema = mongoose.Schema (
     {   
         questions: [ {
@@ -37,6 +38,9 @@ const electionSchema = mongoose.Schema (
         adminProfileId : {
             type: String,
             required: true
+        },
+        electionId : {
+            type: String
         },
         collectors: [ {
             collector : {
