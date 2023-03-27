@@ -1,5 +1,5 @@
 const express = require('express');
-const { findOneAndUpdate } = require('../models/electionModel');
+const { uuid } = require('uuidv4');
 
 const Election = require('../models/electionModel')
 
@@ -9,8 +9,9 @@ const router = new express.Router();
     router.post('/createElection', async (req,res) => {
         try {
             const election = new Election(req.body);
-             await election.save();
-             return res.status(201).json({"type": "SUCCESS","message":"Election Started"})
+            election.electionId = uuid();
+            await election.save();
+            return res.status(201).json({"type": "SUCCESS","message":`Election Started for ${election.electionId}`})
         } catch(e) {
             console.log(`Exception caught --------> ${e}`)
             return res.status(500).send(e);
