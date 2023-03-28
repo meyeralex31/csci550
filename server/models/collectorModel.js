@@ -9,7 +9,8 @@ const collectorSchema = mongoose.Schema (
         electionId : {
             type: String,
             required: true
-        }
+        },
+        collectorId: mongoose.Schema.Types.ObjectId,
     }, {
         timestamps: true,
     }
