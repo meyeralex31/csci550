@@ -11,7 +11,7 @@ const router = new express.Router();
             const election = new Election(req.body);
             election.electionId = uuid();
             await election.save();
-            return res.status(201).json({"type": "SUCCESS","message":`Election Started for ${election.electionId}`})
+            return res.status(201).json({"type": "SUCCESS","message":`Election Started for ${election.electionId}`, electionId: election.electionId})
         } catch(e) {
             console.log(`Exception caught --------> ${e}`)
             return res.status(500).send(e);
@@ -38,7 +38,7 @@ const router = new express.Router();
 //Display available Elections
     router.post('/displayElections', async (req,res) => {
         try {
-            const Elections = await Election.find({}, { electionTitle : 1 , REGISTRATION_STATUS : 1 });
+            const Elections = await Election.find({}, { electionId: 1, electionTitle : 1 , REGISTRATION_STATUS : 1 });
             return res.json(Elections)
         } catch(e) {
             console.log(`Exception caught --------> ${e}`)

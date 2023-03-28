@@ -7,9 +7,8 @@ import AssignmentLateIcon from "@mui/icons-material/AssignmentLate";
 import WarningIcon from "@mui/icons-material/Warning";
 import PublicPrivateButton from "./PublicPrivateButton";
 import { REGISTRATION_STATUS } from "../PublicElectionPage";
-const Status = ({ status }) => {
+const Status = ({ status, registered }) => {
   const publicElection = false;
-  const registered = true;
 
   const buttonstyle = {
     float: "right",

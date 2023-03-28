@@ -30,8 +30,8 @@ const getElections = async (profileId) => {
     .post("http://localhost:8080/displayElections")
     .then((res) => {
       return res.data.map((item) => {
-        // const vd = voteDetails.find((detail) => (detail.electionId = item.id));
-        const vd = { hasRegistered: false };
+        const vd = voteDetails.find((detail) => 
+        detail.electionId === item.electionId);
         return { ...item, registered: vd?.hasRegistered, public: true };
       });
     })
@@ -134,7 +134,7 @@ const PublicElection = () => {
                         disabled={!row.public}
                         status={row.REGISTRATION_STATUS}
                         onClick={() =>
-                          navigate("/registerElection?id=" + row._id)
+                          navigate("/registerElection?id=" + row.electionId)
                         }
                         registered={row.registered}
                       />

@@ -11,6 +11,7 @@ const election = [
             }]
     }],
     "electionTitle" : "Test Election 1",
+    "electionId": '6421b6ddf937d02816345a77',
     "REGISTRATION_STATUS" : "Registeration Open",
     "adminProfileId":"12334",
     "collectors":[
@@ -51,6 +52,8 @@ const election = [
         "id":"IN"
         },
     ],
+    "electionId": '642223b93e51c729a8637d4d',
+
 },
 ]
 

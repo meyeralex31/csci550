@@ -7,7 +7,7 @@ const buttonstyle = {
   cursor: "none",
   pointerEvents: "none",
 };
-const PublicPrivateButton = ({ publicElection }) => {
+const PublicPrivateButton = ({ publicElection = true }) => {
   if (publicElection) {
     return (
       <Button

@@ -19,28 +19,32 @@ router.post('/getSecretBallot', async (req,res) => {
 
 router.post('/getVoterDtls', async (req,res) => {
     try {
-        const  { profileId } = req.body;
+        const  { profileId, electionId } = req.body;
         if(!profileId) {
             return res.status(400).json("Bad Request");
         }
-        const VoterDtls = await Voter.findOne({profileId}, { electionId : 1 , hasRegistered : 1, isElectionOwner: 1 });
+        const search = { profileId, ...(electionId ? {electionId} :{} )}
+        const VoterDtls = await Voter.find(search, { electionId : 1 , hasRegistered : 1, isElectionOwner: 1 });
         return res.json(VoterDtls);
     } catch(e) {
-        console.log(`Exception caught --------> ${err}`)
-        return res.status(500).send(err);
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
     }
 })
 
 router.post('/registerVoter', async (req,res) => {
     try {
-        const  { electionId } = req.body;
-        if(!electionId) {
+        const  { electionId, profileId, hasRegistered } = req.body;
+        if(!electionId || !profileId) {
             return res.status(400).json("Bad Request");
         }
-        await Voter.findOneAndUpdate( { electionId }, {hasRegistered, collectors});
+        await Voter.findOneAndUpdate( { electionId, profileId }, {hasRegistered}, {
+            upsert: true 
+          });
+        return res.status(200).send({hasRegistered: hasRegistered})
     } catch (e) {
-        console.log(`Exception caught --------> ${err}`)
-        return res.status(500).send(err);
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
     }
 })
 

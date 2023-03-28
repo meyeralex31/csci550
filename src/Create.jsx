@@ -189,7 +189,7 @@ const Create = () => {
                         adminProfileId: profileId,
                       })
                       .then((res) => {
-                        navigate("/startElection?id=" + res.data.id);
+                        navigate("/startElection?id=" + res.data.electionId);
                       })
                       .catch((e) => console.error(e));
                   }}
