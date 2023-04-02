@@ -42,12 +42,8 @@ const electionSchema = mongoose.Schema (
         electionId : {
             type: String
         },
-        collectors: [ {
-            collector : {
+        collectors: [{
                 type: String,
-                required: true
-            },
-            collectorId: mongoose.Schema.Types.ObjectId,
      }],
     }, {
         timestamps: true,

@@ -7,13 +7,22 @@ const router = new express.Router();
 //An endpoint to fetch the secret ballot of a profile
 router.post('/updateCollectorDtls', async (req,res) => {
     try {
-        const  { electionId } = req.body;
+        const  { collectorId } = req.body;
         const { url } = req.body;
-        if(!electionId) {
+        if(!collectorId) {
             return res.status(400).json("Bad Request");
         }
-        await Collector.findOneAndUpdate( { electionId }, { url });
+        await Collector.findOneAndUpdate( { collectorId }, { url });
         return res.json({"type": "SUCCESS","message":"Collectors updated"})
+    } catch(err) {
+        console.log(`Exception caught --------> ${err}`)
+        return res.status(500).send(err);
+    }
+})
+
+router.get('/collectorDtls', async (req,res) => {
+    try {
+        return res.json({"type": "SUCCESS", collectors: await Collector.find(undefined, {name: 1, collectorId: 1})})
     } catch(err) {
         console.log(`Exception caught --------> ${err}`)
         return res.status(500).send(err);

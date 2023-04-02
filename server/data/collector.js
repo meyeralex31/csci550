@@ -1,13 +1,16 @@
 const collectors = [
     {
         "url": "https://locaA.com",
-        "electionId": 123,
+        "collectorId": 1236,
+        "name": 'locaA'
       },{
         "url": "https://locaB.com",
-        "electionId": 345,
+        "collectorId": 3457,
+        "name": 'locaB'
       },{
         "url": "https://locaC.com",
-        "electionId": 789,
+        "collectorId": 7898,
+        "name": 'locaC'
       },
 ]
 

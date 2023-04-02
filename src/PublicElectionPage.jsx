@@ -30,9 +30,15 @@ const getElections = async (profileId) => {
     .post("http://localhost:8080/displayElections")
     .then((res) => {
       return res.data.map((item) => {
-        const vd = voteDetails.find((detail) => 
-        detail.electionId === item.electionId);
-        return { ...item, registered: vd?.hasRegistered, public: true };
+        const vd = voteDetails.find(
+          (detail) => detail.electionId === item.electionId
+        );
+        return {
+          ...item,
+          registered: vd?.hasRegistered,
+          isElectionOwner: item?.adminProfileId === profileId,
+          public: true,
+        };
       });
     })
     .catch((e) => console.error(e));
@@ -133,10 +139,15 @@ const PublicElection = () => {
                       <RegisterButton
                         disabled={!row.public}
                         status={row.REGISTRATION_STATUS}
-                        onClick={() =>
-                          navigate("/registerElection?id=" + row.electionId)
-                        }
+                        onClick={() => {
+                          if (row.isElectionOwner) {
+                            navigate("/startElection?id=" + row.electionId);
+                          } else {
+                            navigate("/registerElection?id=" + row.electionId);
+                          }
+                        }}
                         registered={row.registered}
+                        isElectionOwner={row.isElectionOwner}
                       />
                     </TableCell>
                   </TableRow>

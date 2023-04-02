@@ -1,25 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import List from "@mui/material/List";
 import ListSubheader from "@mui/material/ListSubheader";
 import ListItem from "@mui/material/ListItem";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-
-const Collectors = () => {
-  const collectors = [
-    { name: "Indiana" },
-    { name: "Ohio" },
-    { name: "Penn" },
-    { name: "Tennesse" },
-    { name: "Indiana" },
-    { name: "Ohio" },
-    { name: "Penn" },
-    { name: "Tennesse" },
-    { name: "Indiana" },
-    { name: "Ohio" },
-    { name: "Penn" },
-    { name: "Tennesse" },
-  ];
+import axios from "axios";
+const Collectors = ({ collectorsSelectedIds, setCollectorsSelectedIds }) => {
+  const [collectors, setCollectors] = useState([]);
+  useEffect(() => {
+    axios.get("http://localhost:8080/collectorDtls").then((res) => {
+      setCollectors(res.data.collectors);
+    });
+  }, []);
   return (
     <List
       sx={{
@@ -35,15 +27,35 @@ const Collectors = () => {
       subheader={<li />}
     >
       <ListSubheader>Choose atleast 2 Collectors</ListSubheader>
-      {collectors.map((collector) => (
-        <ListItem>
-          <FormControlLabel
-            key={`section-${collector.name}`}
-            label={collector.name}
-            control={<Checkbox defaultChecked />}
-          />
-        </ListItem>
-      ))}
+      {collectors.map((collector) => {
+        const checked = collectorsSelectedIds.includes(collector.collectorId);
+        return (
+          <ListItem key={collector.collectorId}>
+            <FormControlLabel
+              key={`section-${collector.name}`}
+              label={collector.name}
+              control={
+                <Checkbox
+                  checked={checked}
+                  onClick={() => {
+                    setCollectorsSelectedIds((ids) => {
+                      if (checked) {
+                        const index = ids.indexOf(collector.collectorId);
+                        if (index > -1) {
+                          ids.splice(index, 1);
+                        }
+                      } else if (!ids.includes(collector.collectorId)) {
+                        ids.push(collector.collectorId);
+                      }
+                      return [...ids];
+                    });
+                  }}
+                />
+              }
+            />
+          </ListItem>
+        );
+      })}
     </List>
   );
 };

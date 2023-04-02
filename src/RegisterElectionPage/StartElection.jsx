@@ -24,11 +24,16 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 
 const StartElection = () => {
-  const title = "Title";
-  const registered = true;
-  const status = VOTING_IN_PROGRESS_STATUS;
+  const [title, setTitle] = useState("");
+  const [registered, setRegistered] = useState(false);
+  const [status, setStatus] = useState("");
+  const [questions, setQuestions] = useState([]);
+  const [collectorsSelectedIds, setCollectorsSelectedIds] = useState([]);
+
   const [tabValue, setTabValue] = useState(0);
   const [startElectionModalOpen, setStartElectionModalOpen] = useState(false);
+  const [canStartElection, setCanStartElection] = useState(false);
+
   const navigate = useNavigate();
   const { profileId } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -37,8 +42,32 @@ const StartElection = () => {
     if (!searchParams.get("id")) {
       alert("No election id given returning to home page");
       navigate("/");
+    } else {
+      axios
+        .post("http://localhost:8080/displayElections", {
+          electionId: searchParams.get("id"),
+        })
+        .then((res) => {
+          setStatus(res.data[0]?.REGISTRATION_STATUS);
+          setQuestions(res.data[0]?.questions);
+          setCollectorsSelectedIds(res.data[0]?.collectors);
+          setTitle(res.data[0]?.electionTitle)
+        });
     }
   }, []);
+  useEffect(() => {
+    if (profileId) {
+      axios
+        .post("http://localhost:8080/getVoterDtls", {
+          electionId: searchParams.get("id"),
+          profileId,
+        })
+        .then((res) => {
+          setRegistered(res.data[0]?.hasRegistered);
+        });
+    }
+  }, [profileId]);
+
   return (
     <div
       style={{
@@ -57,6 +86,8 @@ const StartElection = () => {
             .put("http://localhost:8080/updateElection", {
               REGISTRATION_STATUS: VOTING_IN_PROGRESS_STATUS,
               profileId,
+              collectors: collectorsSelectedIds,
+              electionId: searchParams.get("id"),
             })
             .then(() => {
               // navigate("/startElection");
@@ -73,7 +104,7 @@ const StartElection = () => {
           <Paper>
             <Grid container style={{ padding: "10px" }}>
               <Grid item xs={5} style={{ borderRight: "1px solid grey" }}>
-                <Status />
+                <Status status={status} registered={registered} />
               </Grid>
               <Grid
                 item
@@ -90,13 +121,16 @@ const StartElection = () => {
                 </Tabs>
                 <TabContext value={tabValue}>
                   <TabPanel value={0} style={{ maxHeight: "320px" }}>
-                    <Collectors />
+                    <Collectors
+                      collectorsSelectedIds={collectorsSelectedIds}
+                      setCollectorsSelectedIds={setCollectorsSelectedIds}
+                    />
                   </TabPanel>
                   <TabPanel value={1} style={{ maxHeight: "320px" }}>
-                    <Questions />
+                    <Questions questions={questions} />
                   </TabPanel>
                   <TabPanel value={2} style={{ maxHeight: "320px" }}>
-                    <RegisterVoters />
+                    <RegisterVoters setCanStartElection={setCanStartElection} />
                   </TabPanel>
                 </TabContext>
               </Grid>
@@ -124,7 +158,17 @@ const StartElection = () => {
                     status={status}
                     onClick={() => {
                       if (status === REGISTRATION_STATUS) {
-                        console.log("registration status changed");
+                        axios
+                          .post("http://localhost:8080/registerVoter", {
+                            profileId,
+                            electionId: searchParams.get("id"),
+                            hasRegistered: !registered,
+                          })
+                          .then((res) => {
+                            if (res.data) {
+                              setRegistered(res.data?.hasRegistered);
+                            }
+                          });
                       } else if (status === VOTING_IN_PROGRESS_STATUS) {
                         navigate("/VotingPage?id=" + searchParams.get("id"));
                       }
@@ -147,6 +191,9 @@ const StartElection = () => {
                       variant="contained"
                       color="info"
                       onClick={() => setStartElectionModalOpen(true)}
+                      disabled={
+                        collectorsSelectedIds?.length < 2 || !canStartElection
+                      }
                     >
                       Open Voting
                     </Button>

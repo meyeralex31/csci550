@@ -6,7 +6,11 @@ const collectorSchema = mongoose.Schema (
             type: String,
             required: true
         },
-        electionId : {
+        collectorId : {
+            type: String,
+            required: true
+        },
+        name: {
             type: String,
             required: true
         }

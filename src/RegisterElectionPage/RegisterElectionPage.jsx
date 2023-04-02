@@ -14,19 +14,28 @@ import { useSearchParams } from "react-router-dom";
 import { useUser } from "../UserContext";
 import axios from "axios";
 const RegisterElectionPage = () => {
-  const title = "Title";
-  const status = REGISTRATION_STATUS;
+  const [title, setTitle] = useState("");
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [registered, setRegistered] = useState(false);
   const [electionOwner, setElectionOwner] = useState(false);
-
+  const [status, setStatus] = useState("");
+  const [questions, setQuestions] = useState([]);
   const { profileId } = useUser();
   useEffect(() => {
     if (!searchParams.get("id")) {
       alert("No election id given returning to home page");
       navigate("/");
     } else {
+      axios
+        .post("http://localhost:8080/displayElections", {
+          electionId: searchParams.get("id"),
+        })
+        .then((res) => {
+          setStatus(res.data[0]?.REGISTRATION_STATUS);
+          setQuestions(res.data[0]?.questions);
+          setTitle(res.data[0]?.electionTitle);
+        });
     }
   }, []);
 
@@ -68,7 +77,7 @@ const RegisterElectionPage = () => {
                 style={{ paddingLeft: "10px", maxHeight: "400px" }}
               >
                 <h3>Questions</h3>
-                <Questions />
+                <Questions questions={questions} />
               </Grid>
               <Grid
                 container
