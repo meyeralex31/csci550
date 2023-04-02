@@ -13,7 +13,8 @@ const collectorSchema = mongoose.Schema (
         name: {
             type: String,
             required: true
-        }
+        },
+        collectorId: mongoose.Schema.Types.ObjectId,
     }, {
         timestamps: true,
     }
