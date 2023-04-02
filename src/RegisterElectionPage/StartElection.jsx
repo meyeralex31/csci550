@@ -51,7 +51,7 @@ const StartElection = () => {
           setStatus(res.data[0]?.REGISTRATION_STATUS);
           setQuestions(res.data[0]?.questions);
           setCollectorsSelectedIds(res.data[0]?.collectors);
-          setTitle(res.data[0]?.electionTitle)
+          setTitle(res.data[0]?.electionTitle);
         });
     }
   }, []);
@@ -90,7 +90,7 @@ const StartElection = () => {
               electionId: searchParams.get("id"),
             })
             .then(() => {
-              // navigate("/startElection");
+              setStatus(VOTING_IN_PROGRESS_STATUS);
             })
             .catch((e) => console.error(e));
           setStartElectionModalOpen(false);

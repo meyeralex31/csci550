@@ -6,11 +6,14 @@ const collectorSchema = mongoose.Schema (
             type: String,
             required: true
         },
+        collectorId : {
+            type: String,
+            required: true
+        },
         name: {
             type: String,
             required: true
         },
-        collectorId: mongoose.Schema.Types.ObjectId,
     }, {
         timestamps: true,
     }
