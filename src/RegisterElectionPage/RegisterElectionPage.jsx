@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Status from "./Status";
@@ -11,47 +11,15 @@ import {
 } from "../PublicElectionPage";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
-import { useUser } from "../UserContext";
+import { useUser } from "../Context/UserContext";
+import { useElectionContext } from "../Context/ElectionContext";
 import axios from "axios";
 const RegisterElectionPage = () => {
-  const [title, setTitle] = useState("");
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [registered, setRegistered] = useState(false);
-  const [electionOwner, setElectionOwner] = useState(false);
-  const [status, setStatus] = useState("");
-  const [questions, setQuestions] = useState([]);
+  const [searchParams] = useSearchParams();
   const { profileId } = useUser();
-  useEffect(() => {
-    if (!searchParams.get("id")) {
-      alert("No election id given returning to home page");
-      navigate("/");
-    } else {
-      axios
-        .post("http://localhost:8080/displayElections", {
-          electionId: searchParams.get("id"),
-        })
-        .then((res) => {
-          setStatus(res.data[0]?.REGISTRATION_STATUS);
-          setQuestions(res.data[0]?.questions);
-          setTitle(res.data[0]?.electionTitle);
-        });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (profileId)
-      axios
-        .post("http://localhost:8080/getVoterDtls", {
-          profileId,
-          electionId: searchParams.get("id"),
-        })
-        .then((res) => {
-          if (res.data) {
-            setRegistered(res.data[0]?.hasRegistered);
-          }
-        });
-  }, [profileId]);
+  const { registered, status, questions, title, setRegistered } =
+    useElectionContext();
 
   return (
     <div

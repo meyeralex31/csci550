@@ -3,7 +3,7 @@ import "./App.css";
 import Login from "./Login";
 import Register from "./Register";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import UserProvider from "./UserContext";
+import UserProvider from "./Context/UserContext";
 import RequireAuth from "./RequireAuth";
 import HomePage from "./HomePage";
 import Create from "./Create";
@@ -12,6 +12,7 @@ import StartElection from "./RegisterElectionPage/StartElection";
 import PublicElection from "./PublicElectionPage";
 import VotingPage from "./VotingPage";
 import Results from "./Results/Results";
+import ElectionProvider from "./Context/ElectionContext";
 const App = () => {
   return (
     <UserProvider>
@@ -39,7 +40,9 @@ const App = () => {
             path="/registerElection"
             element={
               <RequireAuth>
-                <RegisterElectionPage />
+                <ElectionProvider>
+                  <RegisterElectionPage />
+                </ElectionProvider>
               </RequireAuth>
             }
           />
@@ -47,7 +50,9 @@ const App = () => {
             path="/startElection"
             element={
               <RequireAuth>
-                <StartElection />
+                <ElectionProvider>
+                  <StartElection />
+                </ElectionProvider>
               </RequireAuth>
             }
           />

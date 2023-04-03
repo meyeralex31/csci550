@@ -5,7 +5,10 @@ import ListItem from "@mui/material/ListItem";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import axios from "axios";
-const Collectors = ({ collectorsSelectedIds, setCollectorsSelectedIds }) => {
+import { useElectionContext } from "../Context/ElectionContext";
+const Collectors = () => {
+  const { setCollectorsSelectedIds, collectorsSelectedIds } =
+    useElectionContext();
   const [collectors, setCollectors] = useState([]);
   useEffect(() => {
     axios.get("http://localhost:8080/collectorDtls").then((res) => {

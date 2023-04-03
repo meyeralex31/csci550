@@ -1,4 +1,4 @@
-import { useUser } from "./UserContext";
+import { useUser } from "./Context/UserContext";
 import { Navigate } from "react-router-dom";
 const RequireAuth = ({ children }) => {
   const { isSignedIn } = useUser();

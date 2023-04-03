@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import PersonIcon from "@mui/icons-material/Person";
 import CreateIcon from "@mui/icons-material/Create";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "./UserContext";
+import { useUser } from "./Context/UserContext";
 import Grid from "@mui/material/Grid";
 
 const Register = () => {
