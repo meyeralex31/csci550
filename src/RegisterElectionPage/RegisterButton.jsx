@@ -11,9 +11,10 @@ import {
 
 const RegisterButton = ({
   disabled = false,
-  registered = true,
+  registered,
   onClick = () => {},
   status = REGISTRATION_STATUS,
+  isElectionOwner = false,
 }) => {
   const style = { marginRight: "auto", marginLeft: "auto" };
   const buttonDisabled =
@@ -47,18 +48,33 @@ const RegisterButton = ({
       );
     }
   } else if (status === VOTING_IN_PROGRESS_STATUS) {
-    return (
-      <Button
-        startIcon={<BallotIcon />}
-        sx={style}
-        variant="contained"
-        color="primary"
-        disabled={buttonDisabled}
-        onClick={onClick}
-      >
-        Vote
-      </Button>
-    );
+    if (isElectionOwner) {
+      return (
+        <Button
+          startIcon={<BallotIcon />}
+          sx={style}
+          variant="contained"
+          color="primary"
+          disabled={!isElectionOwner}
+          onClick={onClick}
+        >
+          Manage
+        </Button>
+      );
+    } else {
+      return (
+        <Button
+          startIcon={<BallotIcon />}
+          sx={style}
+          variant="contained"
+          color="primary"
+          disabled={buttonDisabled}
+          onClick={onClick}
+        >
+          Vote
+        </Button>
+      );
+    }
   } else if (status === VOTING_ENDED_STATUS) {
     return (
       <Button

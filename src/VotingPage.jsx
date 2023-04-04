@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import MuiAlert from "@mui/material/Alert";
@@ -18,6 +18,7 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import BallotIcon from "@mui/icons-material/Ballot";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const VotingPage = () => {
   const title = "Title";
@@ -30,8 +31,16 @@ const VotingPage = () => {
     { question: "Which fruits do you prefer?", options: ["Apple", "Mango"] },
     { question: "Which animals do you prefer?", options: ["Dog", "Cat"] },
   ];
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!searchParams.get("id")) {
+      alert("No election id given returning to home page");
+      navigate("/");
+    }
+  }, []);
   return (
     <div
       style={{
@@ -91,7 +100,9 @@ const VotingPage = () => {
                 startIcon={<BallotIcon />}
                 variant="contained"
                 color="primary"
-                onClick={() => navigate("/registerElection")}
+                onClick={() =>
+                  navigate("/registerElection?id=" + searchParams.get("id"))
+                }
               >
                 Vote
               </Button>

@@ -13,6 +13,14 @@ const Profile = require('../models/profileModel');
 const voters = require('../data/voters');
 const Voter = require('../models/voterModel');
 
+//Imprting Election fields
+const elections = require('../data/election')
+const Election = require('../models/electionModel');
+
+//Importing Collectors Collection
+const collectors = require('../data/collector');
+const Collector = require('../models/collectorModel');
+
 const importData = async () => {
     try {
         //Below code is to insert profiles in DB
@@ -24,6 +32,18 @@ const importData = async () => {
         await Voter.deleteMany()
 
         await Voter.insertMany(voters);
+
+        //Below code is to insert election data to the DB
+
+        await Election.deleteMany()
+
+        await Election.insertMany(elections)
+
+        //Below code is to insert collectors data to the DB
+
+        await Collector.deleteMany()
+
+        await Collector.insertMany(collectors);
 
         process.exit()
 

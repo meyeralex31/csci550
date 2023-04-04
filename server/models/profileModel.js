@@ -12,7 +12,7 @@ const profileSchema = mongoose.Schema (
         },
         profileId : {
             type: String,
-            required: true
+            // required: true
         },
          name: {
             type: String,

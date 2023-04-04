@@ -3,16 +3,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 
-const Questions = () => {
-  //{ question: "", options: ["", ""] }
-  const questions = [
-    { question: "Which fruits do you prefer?", options: ["Apple", "Mango"] },
-    { question: "Which animals do you prefer?", options: ["Dog", "Cat"] },
-    { question: "Which fruits do you prefer?", options: ["Apple", "Mango"] },
-    { question: "Which animals do you prefer?", options: ["Dog", "Cat"] },
-    { question: "Which fruits do you prefer?", options: ["Apple", "Mango"] },
-    { question: "Which animals do you prefer?", options: ["Dog", "Cat"] },
-  ];
+const Questions = ({ questions = [] }) => {
   return (
     <List
       sx={{
@@ -32,8 +23,8 @@ const Questions = () => {
           <ul>
             <ListSubheader>{question.question}</ListSubheader>
             {question.options.map((option) => (
-              <ListItem key={`item-${question}-${option}`}>
-                <ListItemText primary={option} />
+              <ListItem key={`item-${question}-${option._id}`}>
+                <ListItemText primary={option.option} />
               </ListItem>
             ))}
           </ul>

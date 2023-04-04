@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -14,10 +14,35 @@ import Button from "@mui/material/Button";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import DoneIcon from "@mui/icons-material/Done";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
+import axios from "axios";
+import { useUser } from "./UserContext";
+
 export const REGISTRATION_STATUS = "Registeration Open";
 export const VOTING_IN_PROGRESS_STATUS = "Voting Started";
 export const VOTING_ENDED_STATUS = "Voting Ended";
-
+const getElections = async (profileId) => {
+  const voteDetails = await axios
+    .post("http://localhost:8080/getVoterDtls", { profileId })
+    .then((res) => {
+      return res.data;
+    });
+  return await axios
+    .post("http://localhost:8080/displayElections")
+    .then((res) => {
+      return res.data.map((item) => {
+        const vd = voteDetails.find(
+          (detail) => detail.electionId === item.electionId
+        );
+        return {
+          ...item,
+          registered: vd?.hasRegistered,
+          isElectionOwner: item?.adminProfileId === profileId,
+          public: true,
+        };
+      });
+    })
+    .catch((e) => console.error(e));
+};
 const PublicElection = () => {
   const nonbuttonstyle = {
     float: "right",
@@ -27,14 +52,15 @@ const PublicElection = () => {
     marginLeft: "auto",
   };
   const centerStyle = { marginRight: "auto", marginLeft: "auto" };
-  const elections = [
-    { title: "2024 election", public: true, status: REGISTRATION_STATUS },
-    { title: "2022 election", public: true, status: VOTING_IN_PROGRESS_STATUS },
-    { title: "2020 election", public: true, status: VOTING_ENDED_STATUS },
-    { title: "Private election", public: false, status: REGISTRATION_STATUS },
-  ];
+  const [elections, setElections] = useState([]);
   const navigate = useNavigate();
-
+  const { profileId } = useUser();
+  useEffect(() => {
+    if (profileId)
+      getElections(profileId).then((electionsRes) =>
+        setElections(electionsRes)
+      );
+  }, [profileId]);
   const getStatus = (status) => {
     if (status === REGISTRATION_STATUS) {
       return (
@@ -101,10 +127,10 @@ const PublicElection = () => {
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
                     <TableCell align="center" component="th" scope="row">
-                      {row.title}
+                      {row.electionTitle}
                     </TableCell>
                     <TableCell align="center">
-                      {getStatus(row.status)}
+                      {getStatus(row.REGISTRATION_STATUS)}
                     </TableCell>
                     <TableCell align="center">
                       <PublicPrivateButton publicElection={row.public} />
@@ -112,9 +138,16 @@ const PublicElection = () => {
                     <TableCell align="center">
                       <RegisterButton
                         disabled={!row.public}
-                        status={row.status}
-                        onClick={() => navigate("/registerElection")}
-                        registered={true}
+                        status={row.REGISTRATION_STATUS}
+                        onClick={() => {
+                          if (row.isElectionOwner) {
+                            navigate("/startElection?id=" + row.electionId);
+                          } else {
+                            navigate("/registerElection?id=" + row.electionId);
+                          }
+                        }}
+                        registered={row.registered}
+                        isElectionOwner={row.isElectionOwner}
                       />
                     </TableCell>
                   </TableRow>

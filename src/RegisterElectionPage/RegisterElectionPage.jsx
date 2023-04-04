@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Status from "./Status";
@@ -10,12 +10,48 @@ import {
   VOTING_ENDED_STATUS,
 } from "../PublicElectionPage";
 import { useNavigate } from "react-router-dom";
-
+import { useSearchParams } from "react-router-dom";
+import { useUser } from "../UserContext";
+import axios from "axios";
 const RegisterElectionPage = () => {
-  const title = "Title";
-  const status = VOTING_ENDED_STATUS;
-  const registered = true;
+  const [title, setTitle] = useState("");
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [registered, setRegistered] = useState(false);
+  const [electionOwner, setElectionOwner] = useState(false);
+  const [status, setStatus] = useState("");
+  const [questions, setQuestions] = useState([]);
+  const { profileId } = useUser();
+  useEffect(() => {
+    if (!searchParams.get("id")) {
+      alert("No election id given returning to home page");
+      navigate("/");
+    } else {
+      axios
+        .post("http://localhost:8080/displayElections", {
+          electionId: searchParams.get("id"),
+        })
+        .then((res) => {
+          setStatus(res.data[0]?.REGISTRATION_STATUS);
+          setQuestions(res.data[0]?.questions);
+          setTitle(res.data[0]?.electionTitle);
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (profileId)
+      axios
+        .post("http://localhost:8080/getVoterDtls", {
+          profileId,
+          electionId: searchParams.get("id"),
+        })
+        .then((res) => {
+          if (res.data) {
+            setRegistered(res.data[0]?.hasRegistered);
+          }
+        });
+  }, [profileId]);
 
   return (
     <div
@@ -33,7 +69,7 @@ const RegisterElectionPage = () => {
           <Paper>
             <Grid container style={{ padding: "10px" }}>
               <Grid item xs={5} style={{ borderRight: "1px solid grey" }}>
-                <Status status={status} />
+                <Status status={status} registered={registered} />
               </Grid>
               <Grid
                 item
@@ -41,7 +77,7 @@ const RegisterElectionPage = () => {
                 style={{ paddingLeft: "10px", maxHeight: "400px" }}
               >
                 <h3>Questions</h3>
-                <Questions />
+                <Questions questions={questions} />
               </Grid>
               <Grid
                 container
@@ -59,10 +95,21 @@ const RegisterElectionPage = () => {
                   onClick={() => {
                     if (status === REGISTRATION_STATUS) {
                       console.log("registration status changed");
+                      axios
+                        .post("http://localhost:8080/registerVoter", {
+                          profileId,
+                          electionId: searchParams.get("id"),
+                          hasRegistered: !registered,
+                        })
+                        .then((res) => {
+                          if (res.data) {
+                            setRegistered(res.data?.hasRegistered);
+                          }
+                        });
                     } else if (status === VOTING_IN_PROGRESS_STATUS) {
-                      navigate("/VotingPage");
+                      navigate("/VotingPage?id=" + searchParams.get("id"));
                     } else if (status === VOTING_ENDED_STATUS) {
-                      navigate("/results");
+                      navigate("/results?id=" + searchParams.get("id"));
                     }
                   }}
                 />

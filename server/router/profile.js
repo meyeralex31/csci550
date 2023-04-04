@@ -1,6 +1,7 @@
 const express = require('express');
 
 const Profile = require('../models/profileModel')
+const genProfileId = require('../utilities/idGen');
 
 const router = new express.Router();
 
@@ -20,6 +21,8 @@ router.get('/profiles', async (req,res) => {
 router.post('/signup', async (req,res) => {
     try {
         const profile = new Profile(req.body);
+        const profileId = genProfileId();
+        profile.profileId = profileId;
         await profile.save();
         return res.status(201).json({"type": "SUCCESS","message":"Voter registered"})
     } catch(e) {
@@ -29,6 +32,7 @@ router.post('/signup', async (req,res) => {
 })
 
 //To authenticate a user
+//Pass to encrypted later
 router.post('/login', async (req,res) => {
     try {
         if(req.body.username && req.body.password) {

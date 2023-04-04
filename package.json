@@ -14,12 +14,14 @@
     "axios": "^1.3.4",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "js-sha256": "^0.9.0",
     "mongoose": "^6.8.4",
     "nodemon": "^2.0.20",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.7.0",
     "react-scripts": "5.0.1",
+    "uuidv4": "^6.2.13",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
