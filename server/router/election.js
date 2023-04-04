@@ -2,6 +2,7 @@ const express = require('express');
 const { uuid } = require('uuidv4');
 
 const Election = require('../models/electionModel')
+const createRouter = (socket) => {
 
 const router = new express.Router();
 
@@ -29,6 +30,7 @@ const router = new express.Router();
                 return res.status(400).json("Bad Request");
             }
             await Election.findOneAndUpdate( { adminProfileId,electionId }, {REGISTRATION_STATUS, collectors});
+            socket.emit(`status-${electionId}`, {status: REGISTRATION_STATUS})
             return res.json({"type": "SUCCESS","message":"Election updated"})
         } catch(e) {
             console.log(`Exception caught --------> ${e}`)
@@ -48,7 +50,9 @@ const router = new express.Router();
             return res.status(500).send(e);
         }
     })
+    return router;
+}
 
 
 
-module.exports = router;
+module.exports = createRouter;

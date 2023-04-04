@@ -3,7 +3,8 @@ const express = require('express');
 const Voter = require('../models/voterModel')
 const Profile = require('../models/profileModel')
 
-const router = new express.Router();
+const createRouter = (socket,electionOwnerToSocketId) => {
+    const router = new express.Router();
 
 //An endpoint to fetch the secret ballot of a profile
 router.post('/getSecretBallot', async (req,res) => {
@@ -42,6 +43,10 @@ router.post('/registerVoter', async (req,res) => {
         await Voter.findOneAndUpdate( { electionId, profileId }, {hasRegistered}, {
             upsert: true 
           });
+          if (electionOwnerToSocketId[electionId]) {
+            socket.to(electionOwnerToSocketId[electionId]).emit(`registered-${electionId}`, 'change in registeration');
+          }
+
         return res.status(200).send({hasRegistered: hasRegistered})
     } catch (e) {
         console.log(`Exception caught --------> ${e}`)
@@ -56,8 +61,8 @@ router.get('/registerVoters', async (req,res) => {
             console.log(req.params)
             return res.status(400).json("Bad Request");
         }
-        const profiles = await Voter.find( { electionId }, {profileId: 1});
-        const profilesNamesRegistered = await Promise.all(profiles.map((profile) =>{
+        const profiles = await Voter.find( { electionId }, {profileId: 1, hasRegistered: 1});
+        const profilesNamesRegistered = await Promise.all(profiles.filter(profile => profile.hasRegistered).map((profile) =>{
             return Profile.findOne({profileId: profile.profileId}, {name: 1}).then(res => {
                 return { name: res.name};
             })
@@ -68,7 +73,10 @@ router.get('/registerVoters', async (req,res) => {
         return res.status(500).send(e);
     }
 })
+return router;
+}
 
 
 
-module.exports = router;
+
+module.exports = createRouter;

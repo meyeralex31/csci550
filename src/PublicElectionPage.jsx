@@ -15,7 +15,7 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import DoneIcon from "@mui/icons-material/Done";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
 import axios from "axios";
-import { useUser } from "./UserContext";
+import { useUser } from "./Context/UserContext";
 
 export const REGISTRATION_STATUS = "Registeration Open";
 export const VOTING_IN_PROGRESS_STATUS = "Voting Started";
@@ -51,7 +51,6 @@ const PublicElection = () => {
     marginRight: "auto",
     marginLeft: "auto",
   };
-  const centerStyle = { marginRight: "auto", marginLeft: "auto" };
   const [elections, setElections] = useState([]);
   const navigate = useNavigate();
   const { profileId } = useUser();

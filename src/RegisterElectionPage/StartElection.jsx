@@ -16,57 +16,36 @@ import StartVotingModal from "./StartVotingModal";
 import {
   REGISTRATION_STATUS,
   VOTING_IN_PROGRESS_STATUS,
-  VOTING_ENDED_STATUS,
 } from "../PublicElectionPage";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../UserContext";
+import { useUser } from "../Context/UserContext";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
+import { useElectionContext } from "../Context/ElectionContext";
 
 const StartElection = () => {
-  const [title, setTitle] = useState("");
-  const [registered, setRegistered] = useState(false);
-  const [status, setStatus] = useState("");
-  const [questions, setQuestions] = useState([]);
-  const [collectorsSelectedIds, setCollectorsSelectedIds] = useState([]);
-
   const [tabValue, setTabValue] = useState(0);
   const [startElectionModalOpen, setStartElectionModalOpen] = useState(false);
   const [canStartElection, setCanStartElection] = useState(false);
 
   const navigate = useNavigate();
   const { profileId } = useUser();
-  const [searchParams, setSearchParams] = useSearchParams();
-
+  const [searchParams] = useSearchParams();
+  const {
+    registered,
+    status,
+    questions,
+    title,
+    setRegistered,
+    setStatus,
+    registedVoters,
+    collectorsSelectedIds,
+  } = useElectionContext();
   useEffect(() => {
-    if (!searchParams.get("id")) {
-      alert("No election id given returning to home page");
-      navigate("/");
-    } else {
-      axios
-        .post("http://localhost:8080/displayElections", {
-          electionId: searchParams.get("id"),
-        })
-        .then((res) => {
-          setStatus(res.data[0]?.REGISTRATION_STATUS);
-          setQuestions(res.data[0]?.questions);
-          setCollectorsSelectedIds(res.data[0]?.collectors);
-          setTitle(res.data[0]?.electionTitle);
-        });
-    }
-  }, []);
-  useEffect(() => {
-    if (profileId) {
-      axios
-        .post("http://localhost:8080/getVoterDtls", {
-          electionId: searchParams.get("id"),
-          profileId,
-        })
-        .then((res) => {
-          setRegistered(res.data[0]?.hasRegistered);
-        });
-    }
-  }, [profileId]);
+    setCanStartElection(
+      registedVoters?.length >= 3 && collectorsSelectedIds?.length >= 2
+    );
+  }, [registedVoters, collectorsSelectedIds]);
 
   return (
     <div
@@ -121,16 +100,13 @@ const StartElection = () => {
                 </Tabs>
                 <TabContext value={tabValue}>
                   <TabPanel value={0} style={{ maxHeight: "320px" }}>
-                    <Collectors
-                      collectorsSelectedIds={collectorsSelectedIds}
-                      setCollectorsSelectedIds={setCollectorsSelectedIds}
-                    />
+                    <Collectors />
                   </TabPanel>
                   <TabPanel value={1} style={{ maxHeight: "320px" }}>
                     <Questions questions={questions} />
                   </TabPanel>
                   <TabPanel value={2} style={{ maxHeight: "320px" }}>
-                    <RegisterVoters setCanStartElection={setCanStartElection} />
+                    <RegisterVoters />
                   </TabPanel>
                 </TabContext>
               </Grid>

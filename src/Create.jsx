@@ -15,7 +15,7 @@ import SaveAsIcon from "@mui/icons-material/SaveAs";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { REGISTRATION_STATUS } from "./PublicElectionPage";
-import { useUser } from "./UserContext";
+import { useUser } from "./Context/UserContext";
 
 const Create = () => {
   // structure {question: string, options: string[]}
