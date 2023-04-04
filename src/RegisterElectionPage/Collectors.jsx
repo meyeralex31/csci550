@@ -30,8 +30,8 @@ const Collectors = () => {
       subheader={<li />}
     >
       <ListSubheader>Choose atleast 2 Collectors</ListSubheader>
-      {collectors.map((collector) => {
-        const checked = collectorsSelectedIds.includes(collector.collectorId);
+      {collectors?.map((collector) => {
+        const checked = collectorsSelectedIds?.includes(collector.collectorId);
         return (
           <ListItem key={collector.collectorId}>
             <FormControlLabel

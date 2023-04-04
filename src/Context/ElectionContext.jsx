@@ -3,7 +3,10 @@ import axios from "axios";
 import { useUser } from "./UserContext";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
+import { io } from "socket.io-client";
+const socket = io("http://localhost:8080", {
+  autoConnect: false,
+});
 const ElectionContext = React.createContext({});
 const ElectionProvider = ({ children }) => {
   const [title, setTitle] = useState("");
@@ -16,9 +19,12 @@ const ElectionProvider = ({ children }) => {
   const [collectorsSelectedIds, setCollectorsSelectedIds] = useState([]);
   const [registedVoters, setRegistedVoters] = useState([]);
   const [electionOwner, setElectionOwner] = useState([]);
-  const isElectionOwner =
-    profileId === electionOwner && profileId && electionOwner;
-
+  const isElectionOwner = !!(
+    profileId === electionOwner &&
+    profileId &&
+    electionOwner
+  );
+  const [socketId, setSocketId] = useState("");
   useEffect(() => {
     if (!searchParams.get("id")) {
       alert("No election id given returning to home page");
@@ -49,7 +55,7 @@ const ElectionProvider = ({ children }) => {
         });
     }
   }, [profileId]);
-  useEffect(() => {
+  const getRegisteredVoters = () => {
     if (isElectionOwner)
       axios
         .get(
@@ -62,8 +68,38 @@ const ElectionProvider = ({ children }) => {
             setRegistedVoters(res.data.profilesNamesRegistered);
           }
         });
-  }, [profileId, electionOwner, isElectionOwner]);
+  };
+  useEffect(() => {
+    getRegisteredVoters();
+  }, [profileId, isElectionOwner]);
+  useEffect(() => {
+    setSocketId(socket.id);
+  }, [socket.id]);
+  useEffect(() => {
+    if (isElectionOwner && socketId) {
+      socket.on(`registered-${searchParams.get("id")}`, getRegisteredVoters);
+      socket.emit("electionOwnerListening", {
+        profileId,
+        electionId: searchParams.get("id"),
+        socketID: socketId,
+      });
+    }
+  }, [isElectionOwner, socketId]);
+  useEffect(() => {
+    socket.connect();
+    socket.on(`status-${searchParams.get("id")}`, (event) => {
+      if (event?.status) {
+        setStatus(event?.status);
+      }
+    });
 
+    return () => {
+      socket.off(`registered-${searchParams.get("id")}`, getRegisteredVoters);
+      socket.off(`status-${searchParams.get("id")}`, () => {});
+
+      socket.disconnect();
+    };
+  }, [searchParams.get("id")]);
   return (
     <ElectionContext.Provider
       value={{
