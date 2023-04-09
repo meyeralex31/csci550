@@ -16,16 +16,21 @@ import StartVotingModal from "./StartVotingModal";
 import {
   REGISTRATION_STATUS,
   VOTING_IN_PROGRESS_STATUS,
+  VOTING_ENDED_STATUS,
 } from "../PublicElectionPage";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Context/UserContext";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { useElectionContext } from "../Context/ElectionContext";
+import StopCircleIcon from "@mui/icons-material/StopCircle";
+import CloseElectionModal from "./CloseElectionModal";
 
 const StartElection = () => {
   const [tabValue, setTabValue] = useState(0);
   const [startElectionModalOpen, setStartElectionModalOpen] = useState(false);
+  const [closeElectionModalOpen, setCloseElectionModalOpen] = useState(false);
+
   const [canStartElection, setCanStartElection] = useState(false);
 
   const navigate = useNavigate();
@@ -75,6 +80,26 @@ const StartElection = () => {
           setStartElectionModalOpen(false);
         }}
       />
+
+      <CloseElectionModal
+        open={closeElectionModalOpen}
+        handleClose={() => {
+          setCloseElectionModalOpen(false);
+        }}
+        stopVoting={() => {
+          axios
+            .put("http://localhost:8080/updateElection", {
+              REGISTRATION_STATUS: VOTING_ENDED_STATUS,
+              profileId,
+              electionId: searchParams.get("id"),
+            })
+            .then(() => {
+              setStatus(VOTING_ENDED_STATUS);
+            })
+            .catch((e) => console.error(e));
+          setCloseElectionModalOpen(false);
+        }}
+      />
       <Grid style={{ width: "80%", maxHeight: "80%" }} container spacing={2}>
         <Grid item xs={12} style={{ textAlign: "center" }}>
           {title}
@@ -100,7 +125,7 @@ const StartElection = () => {
                 </Tabs>
                 <TabContext value={tabValue}>
                   <TabPanel value={0} style={{ maxHeight: "320px" }}>
-                    <Collectors />
+                    <Collectors disabled={status !== REGISTRATION_STATUS} />
                   </TabPanel>
                   <TabPanel value={1} style={{ maxHeight: "320px" }}>
                     <Questions questions={questions} />
@@ -151,6 +176,28 @@ const StartElection = () => {
                     }}
                   />
                 </Grid>
+                {status === VOTING_IN_PROGRESS_STATUS && (
+                  <Grid
+                    item
+                    xs={6}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Button
+                      startIcon={<StopCircleIcon />}
+                      style={{ marginRight: "auto", marginLeft: "auto" }}
+                      variant="contained"
+                      color="warning"
+                      onClick={() => setCloseElectionModalOpen(true)}
+                      // TODO disable if less than 2 people have voted
+                    >
+                      Close Voting
+                    </Button>
+                  </Grid>
+                )}
                 {status === REGISTRATION_STATUS && (
                   <Grid
                     item

@@ -35,6 +35,7 @@ const ElectionProvider = ({ children }) => {
           electionId: searchParams.get("id"),
         })
         .then((res) => {
+          console.log(res.data[0]);
           setStatus(res.data[0]?.REGISTRATION_STATUS);
           setQuestions(res.data[0]?.questions);
           setCollectorsSelectedIds(res.data[0]?.collectors);
@@ -89,6 +90,7 @@ const ElectionProvider = ({ children }) => {
     socket.connect();
     socket.on(`status-${searchParams.get("id")}`, (event) => {
       if (event?.status) {
+        console.log("status is being set", event?.status);
         setStatus(event?.status);
       }
     });
@@ -100,6 +102,7 @@ const ElectionProvider = ({ children }) => {
       socket.disconnect();
     };
   }, [searchParams.get("id")]);
+  console.log("status", status);
   return (
     <ElectionContext.Provider
       value={{
@@ -112,7 +115,7 @@ const ElectionProvider = ({ children }) => {
           : undefined,
         registedVoters: isElectionOwner ? registedVoters : undefined,
         setStatus: isElectionOwner ? setStatus : undefined,
-
+        isElectionOwner,
         setRegistered,
         setCollectorsSelectedIds: isElectionOwner
           ? setCollectorsSelectedIds

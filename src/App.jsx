@@ -67,9 +67,11 @@ const App = () => {
           <Route
             path="/votingPage"
             element={
-              <RequireAuth>
-                <VotingPage />
-              </RequireAuth>
+              <ElectionProvider>
+                <RequireAuth>
+                  <VotingPage />
+                </RequireAuth>
+              </ElectionProvider>
             }
           />
           <Route

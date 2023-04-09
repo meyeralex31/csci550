@@ -6,8 +6,12 @@ import CheckIcon from "@mui/icons-material/Check";
 import AssignmentLateIcon from "@mui/icons-material/AssignmentLate";
 import WarningIcon from "@mui/icons-material/Warning";
 import PublicPrivateButton from "./PublicPrivateButton";
-import { REGISTRATION_STATUS } from "../PublicElectionPage";
-const Status = ({ status, registered }) => {
+import {
+  REGISTRATION_STATUS,
+  VOTING_IN_PROGRESS_STATUS,
+  VOTING_ENDED_STATUS,
+} from "../PublicElectionPage";
+const Status = ({ hasVoted = false, status, registered }) => {
   const publicElection = false;
 
   const buttonstyle = {
@@ -27,7 +31,30 @@ const Status = ({ status, registered }) => {
           Open for Registration
         </Button>
       );
-    } else {
+    } else if (status === VOTING_IN_PROGRESS_STATUS) {
+      if (!registered) {
+        return (
+          <Button
+            style={buttonstyle}
+            startIcon={<AssignmentLateIcon />}
+            variant="outlined"
+            color="error"
+          >
+            Closed for Registration
+          </Button>
+        );
+      }
+      return (
+        <Button
+          style={buttonstyle}
+          startIcon={<PendingActionsIcon />}
+          variant="outlined"
+          color="success"
+        >
+          Open for Voting
+        </Button>
+      );
+    } else if (status === VOTING_ENDED_STATUS) {
       return (
         <Button
           style={buttonstyle}
@@ -35,14 +62,14 @@ const Status = ({ status, registered }) => {
           variant="outlined"
           color="error"
         >
-          Closed for Registration
+          Voting Complete
         </Button>
       );
     }
   };
 
-  const getRegisteredButton = () => {
-    if (registered) {
+  const getYesNoButton = (booleanValue) => {
+    if (booleanValue) {
       return (
         <Button
           startIcon={<CheckIcon />}
@@ -94,8 +121,18 @@ const Status = ({ status, registered }) => {
         Registered?:
       </Grid>
       <Grid item xs={9} style={{ float: "right" }}>
-        {getRegisteredButton()}
+        {getYesNoButton(hasVoted)}
       </Grid>
+      {status !== REGISTRATION_STATUS && registered && (
+        <>
+          <Grid item xs={3}>
+            Has Voted?:
+          </Grid>
+          <Grid item xs={9} style={{ float: "right" }}>
+            {getYesNoButton(hasVoted)}
+          </Grid>
+        </>
+      )}
     </Grid>
   );
 };
