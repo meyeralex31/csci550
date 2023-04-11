@@ -1,11 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import { useNavigate } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import TabPanel from "@mui/lab/TabPanel";
+import TabContext from "@mui/lab/TabContext";
+import { BallotDisplay } from "./BallotDisplay";
 import { useResultsContext } from "../Context/ResultsContext";
 const Results = () => {
-  const { title, questions, ballotVoted } = useResultsContext();
+  const { title, questions, ballotVoted, reverseBallotVoted } =
+    useResultsContext();
+  const [tabValue, setTabValue] = useState(0);
+
   return (
     <div
       style={{
@@ -47,25 +53,27 @@ const Results = () => {
         <Grid item xs={12}>
           <Paper style={{ paddingBottom: "25px" }}>
             <Grid container style={{ padding: "10px" }} spacing={2}>
-              <Grid item xs={12} style={{ textAlign: "center" }}>
-                Ballots
+              <Grid item xs={12}>
+                <Tabs
+                  value={tabValue}
+                  onChange={(_, newValue) => setTabValue(newValue)}
+                >
+                  <Tab label="Foward Ballot" />
+                  <Tab label="Reverse Ballot" />
+                </Tabs>
+                <TabContext value={tabValue}>
+                  <TabPanel value={0} style={{ maxHeight: "320px" }}>
+                    <Grid container style={{ padding: "10px" }} spacing={2}>
+                      <BallotDisplay ballots={ballotVoted} />
+                    </Grid>
+                  </TabPanel>
+                  <TabPanel value={1} style={{ maxHeight: "320px" }}>
+                    <Grid container style={{ padding: "10px" }} spacing={2}>
+                      <BallotDisplay ballots={reverseBallotVoted} />
+                    </Grid>
+                  </TabPanel>
+                </TabContext>
               </Grid>
-              {ballotVoted?.map((ballot, index) => (
-                <Grid item xs={4} key={index} style={{ textAlign: "center" }}>
-                  <Paper style={{ height: "100%", width: "100%" }}>
-                    <h5>Ballot {index}</h5>
-                    {questions.map((question, questionIndex) => {
-                      const voteLocation = ballot[question._id];
-                      const vote = question.options[voteLocation];
-                      return (
-                        <div>
-                          {questionIndex + 1}. {vote.option}
-                        </div>
-                      );
-                    })}
-                  </Paper>
-                </Grid>
-              ))}
             </Grid>
           </Paper>
         </Grid>

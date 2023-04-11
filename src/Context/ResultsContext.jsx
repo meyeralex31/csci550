@@ -46,9 +46,9 @@ const ResultsProvider = ({ children }) => {
               const chunkBallot = (ballot) => {
                 let binaryString = ballot?.toString(2).padStart(5, "0");
                 const targetLength =
-                  Math.ceil(binaryString.length / question?.options.length) *
-                  question?.options.length;
-                binaryString = binaryString.padStart(targetLength, "0");
+                  Math.ceil(binaryString?.length / question?.options?.length) *
+                  question?.options?.length;
+                binaryString = binaryString?.padStart(targetLength, "0");
                 return binaryString?.match(
                   new RegExp(".{1," + question?.options.length + "}", "g")
                 );
@@ -60,7 +60,6 @@ const ResultsProvider = ({ children }) => {
                   let voteLocation = chunck.indexOf("1");
                   if (voteLocation >= 0) {
                     voteLocation = question.options.length - voteLocation - 1;
-                    console.log(voteLocation);
                     setBallotVoted((prev) => {
                       prev[index] = {
                         ...prev?.[index],
@@ -72,6 +71,23 @@ const ResultsProvider = ({ children }) => {
                     question.options[voteLocation].total = total
                       ? total + 1
                       : 1;
+                  }
+                });
+
+              chunkBallot(question?.reverseBallot)
+                ?.reverse()
+                ?.forEach((chunck, index) => {
+                  console.log(chunck, index);
+                  let voteLocation = chunck.indexOf("1");
+                  if (voteLocation >= 0) {
+                    console.log("voteLocation", voteLocation);
+                    setReverseBallotVoted((prev) => {
+                      prev[index] = {
+                        ...prev?.[index],
+                        [question._id]: voteLocation,
+                      };
+                      return prev;
+                    });
                   }
                 });
               question.choosenIndex = indexOfMax(question.options);
@@ -89,6 +105,7 @@ const ResultsProvider = ({ children }) => {
         title,
         questions,
         ballotVoted,
+        reverseBallotVoted,
       }}
     >
       {children}
