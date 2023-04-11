@@ -21,17 +21,23 @@ import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { useElectionContext } from "./Context/ElectionContext";
 import { VOTING_IN_PROGRESS_STATUS } from "./PublicElectionPage";
+import axios from "axios";
+import { useUser } from "./Context/UserContext";
+
 const VotingPage = () => {
   const [showVotingLocation, setShowVotingLocation] = useState(false);
   const { isElectionOwner, status, questions, title } = useElectionContext();
+  const { profileId } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // this structure is { [electionId]: answer }
   const [answers, setAnswers] = useState({});
   const [allAnswersMade, setAllAnswersMade] = useState(false);
   // TODO values we need to get from server
-  const collectorShares = [5, 5];
-  const location = 6;
+  const collectorShares = [];
+  const collectorSharesPrime = [];
+  // we will obvisouly need to set this on server
+  const [location, setLocation] = useState();
   const totalVoters = 6;
   // end
   const redirect = () => {
@@ -48,7 +54,6 @@ const VotingPage = () => {
       const indexOfAnswer = question.options.findIndex(
         (option) => option._id === answerID
       );
-      debugger;
       if (indexOfAnswer < 0) {
         console.error("cant find option or answer");
         return {};
@@ -67,14 +72,25 @@ const VotingPage = () => {
         (totalVoters - location) * question.options.length +
         (question.options.length - indexOfAnswer - 1);
       const vPrime = 2 ** powerVPrime;
-      const pPrime = collectorShares.reduce(
+      const pPrime = collectorSharesPrime.reduce(
         (accumulator, currentValue) => accumulator + currentValue,
         vPrime
       );
-
-      return { v, p, vPrime, pPrime };
+      return {
+        fowardBallot: p,
+        reverseBallot: pPrime,
+        questionId: question._id,
+      };
     });
-    console.log(itemToSumbit);
+    axios
+      .post("http://localhost:8080/vote", {
+        profileId,
+        electionId: searchParams.get("id"),
+        questionsVotedOn: itemToSumbit,
+      })
+      .then((res) => {
+        redirect();
+      });
   };
   useEffect(() => {
     if (status !== "" && status !== VOTING_IN_PROGRESS_STATUS) redirect();
@@ -83,7 +99,6 @@ const VotingPage = () => {
   useEffect(() => {
     setAllAnswersMade(
       questions.every((question) => {
-        console.log(answers[question._id]);
         return answers[question._id];
       })
     );
@@ -158,7 +173,6 @@ const VotingPage = () => {
                 color="primary"
                 onClick={() => {
                   sumbit();
-                  redirect();
                 }}
               >
                 Vote
@@ -182,7 +196,7 @@ const VotingPage = () => {
                   Location
                 </InputLabel>
                 <OutlinedInput
-                  disabled={true}
+                  // disabled={true}
                   value={location}
                   type={showVotingLocation ? "text" : "password"}
                   startAdornment={
@@ -190,6 +204,9 @@ const VotingPage = () => {
                       <LockIcon />
                     </InputAdornment>
                   }
+                  onChange={(e) => {
+                    setLocation(Number(e.target.value));
+                  }}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton

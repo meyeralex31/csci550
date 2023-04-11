@@ -121,7 +121,7 @@ const Status = ({ hasVoted = false, status, registered }) => {
         Registered?:
       </Grid>
       <Grid item xs={9} style={{ float: "right" }}>
-        {getYesNoButton(hasVoted)}
+        {getYesNoButton(registered)}
       </Grid>
       {status !== REGISTRATION_STATUS && registered && (
         <>

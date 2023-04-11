@@ -11,6 +11,7 @@ const ElectionContext = React.createContext({});
 const ElectionProvider = ({ children }) => {
   const [title, setTitle] = useState("");
   const [registered, setRegistered] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
   const [status, setStatus] = useState("");
   const [questions, setQuestions] = useState([]);
   const { profileId } = useUser();
@@ -24,6 +25,10 @@ const ElectionProvider = ({ children }) => {
     profileId &&
     electionOwner
   );
+  console.log("isElectionOwner", isElectionOwner);
+  console.log("electionOwner", electionOwner);
+  console.log("profileId", profileId);
+
   const [socketId, setSocketId] = useState("");
   useEffect(() => {
     if (!searchParams.get("id")) {
@@ -35,10 +40,9 @@ const ElectionProvider = ({ children }) => {
           electionId: searchParams.get("id"),
         })
         .then((res) => {
-          console.log(res.data[0]);
           setStatus(res.data[0]?.REGISTRATION_STATUS);
           setQuestions(res.data[0]?.questions);
-          setCollectorsSelectedIds(res.data[0]?.collectors);
+          setCollectorsSelectedIds([...res.data[0]?.collectors]);
           setTitle(res.data[0]?.electionTitle);
           setElectionOwner(res.data[0]?.adminProfileId);
         });
@@ -53,6 +57,7 @@ const ElectionProvider = ({ children }) => {
         })
         .then((res) => {
           setRegistered(res.data[0]?.hasRegistered);
+          setHasVoted(res.data[0]?.hasVoted);
         });
     }
   }, [profileId]);
@@ -90,7 +95,6 @@ const ElectionProvider = ({ children }) => {
     socket.connect();
     socket.on(`status-${searchParams.get("id")}`, (event) => {
       if (event?.status) {
-        console.log("status is being set", event?.status);
         setStatus(event?.status);
       }
     });
@@ -102,13 +106,13 @@ const ElectionProvider = ({ children }) => {
       socket.disconnect();
     };
   }, [searchParams.get("id")]);
-  console.log("status", status);
   return (
     <ElectionContext.Provider
       value={{
         title,
         registered,
         status,
+        hasVoted,
         questions,
         collectorsSelectedIds: isElectionOwner
           ? collectorsSelectedIds

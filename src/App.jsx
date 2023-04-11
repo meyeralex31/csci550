@@ -13,6 +13,7 @@ import PublicElection from "./PublicElectionPage";
 import VotingPage from "./VotingPage";
 import Results from "./Results/Results";
 import ElectionProvider from "./Context/ElectionContext";
+import ResultsProvider from "./Context/ResultsContext";
 const App = () => {
   return (
     <UserProvider>
@@ -78,7 +79,9 @@ const App = () => {
             path="/results"
             element={
               <RequireAuth>
-                <Results />
+                <ResultsProvider>
+                  <Results />
+                </ResultsProvider>
               </RequireAuth>
             }
           />

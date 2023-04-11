@@ -44,6 +44,7 @@ const StartElection = () => {
     setRegistered,
     setStatus,
     registedVoters,
+    hasVoted,
     collectorsSelectedIds,
   } = useElectionContext();
   useEffect(() => {
@@ -108,7 +109,11 @@ const StartElection = () => {
           <Paper>
             <Grid container style={{ padding: "10px" }}>
               <Grid item xs={5} style={{ borderRight: "1px solid grey" }}>
-                <Status status={status} registered={registered} />
+                <Status
+                  status={status}
+                  registered={registered}
+                  hasVoted={hasVoted}
+                />
               </Grid>
               <Grid
                 item
@@ -155,6 +160,7 @@ const StartElection = () => {
                   }}
                 >
                   <RegisterButton
+                    disabled={status === VOTING_IN_PROGRESS_STATUS && hasVoted}
                     registered={registered}
                     status={status}
                     onClick={() => {
@@ -172,6 +178,8 @@ const StartElection = () => {
                           });
                       } else if (status === VOTING_IN_PROGRESS_STATUS) {
                         navigate("/VotingPage?id=" + searchParams.get("id"));
+                      } else {
+                        navigate("/results?id=" + searchParams.get("id"));
                       }
                     }}
                   />

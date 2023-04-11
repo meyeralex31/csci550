@@ -29,6 +29,20 @@ const voterSchema = mongoose.Schema (
             type: Boolean,
             // required: true
         },
+        questionsVotedOn: [{
+            questionId: {
+                type: String
+            },
+            fowardBallot : {
+                type: Number,
+                // required: true 
+            },
+            reverseBallot : {
+                type: Number,
+                // required: true 
+            },
+        }]
+       
     }, {
         timestamps: true,
     }

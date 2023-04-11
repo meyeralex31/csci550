@@ -19,7 +19,7 @@ const RegisterVoters = () => {
       }}
       subheader={<li />}
     >
-      {registedVoters.map((voter) => (
+      {registedVoters?.map((voter) => (
         <ListItem key={`item-${voter.name}`}>
           <ListItemText primary={voter.name} />
         </ListItem>
