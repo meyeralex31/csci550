@@ -25,9 +25,6 @@ const ElectionProvider = ({ children }) => {
     profileId &&
     electionOwner
   );
-  console.log("isElectionOwner", isElectionOwner);
-  console.log("electionOwner", electionOwner);
-  console.log("profileId", profileId);
 
   const [socketId, setSocketId] = useState("");
   useEffect(() => {

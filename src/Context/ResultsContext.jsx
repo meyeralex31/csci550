@@ -8,7 +8,6 @@ const ResultsProvider = ({ children }) => {
   const [title, setTitle] = useState("");
   const [questions, setQuestions] = useState([]);
   const [ballotVoted, setBallotVoted] = useState([]);
-  // TODO
   const [reverseBallotVoted, setReverseBallotVoted] = useState([]);
 
   const [searchParams] = useSearchParams();
