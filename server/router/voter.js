@@ -4,8 +4,15 @@ const Voter = require('../models/voterModel')
 const Profile = require('../models/profileModel')
 const Election = require('../models/electionModel')
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
 const createRouter = (socket,electionOwnerToSocketId) => {
     const router = new express.Router();
+
+    // Forward & Reverse ballots
+    // Fe just needs
 
 //An endpoint to fetch the secret ballot of a profile
 router.post('/getSecretBallot', async (req,res) => {
@@ -41,6 +48,7 @@ router.post('/registerVoter', async (req,res) => {
         if(!electionId || !profileId) {
             return res.status(400).json("Bad Request");
         }
+        // let genSecretLocation = `${electionId}-${profileId}-${Date.now().toString(36)}`;
         await Voter.findOneAndUpdate( { electionId, profileId }, {hasRegistered}, {
             upsert: true 
           });
@@ -63,10 +71,12 @@ router.post('/vote', async (req,res) => {
         }
         // TODO we will need to let election owner know that a vote has happened
         // TODO we will need to run validation on ballots before we save them
-        await Voter.findOneAndUpdate( { electionId, profileId }, {questionsVotedOn,hasVoted: true }, {
+        //Produces the Vote
+        const secretVote = getRandomInt(20); 
+        await Voter.findOneAndUpdate( { electionId, profileId }, {questionsVotedOn ,hasVoted: true, secretVote }, {
             upsert: true 
           });
-                  // TODO we will need to let election owner know that a vote has happened
+        // TODO we will need to let election owner know that a vote has happened
 
           if (electionOwnerToSocketId[electionId]) {
             socket.to(electionOwnerToSocketId[electionId]).emit(`voted-${electionId}`, 'a user voted');
@@ -85,6 +95,8 @@ router.get('/registerVoters', async (req,res) => {
         if(!electionId && !profileId) {
             return res.status(400).json("Bad Request");
         }
+        const secretLocation = getRandomInt(20);
+        Voter.findOneAndUpdate({electionId} , {secretLocation});
         const profiles = await Voter.find( { electionId }, {profileId: 1, hasRegistered: 1});
         const profilesNamesRegistered = await Promise.all(profiles.filter(profile => profile.hasRegistered).map((profile) =>{
             return Profile.findOne({profileId: profile.profileId}, {name: 1}).then(res => {

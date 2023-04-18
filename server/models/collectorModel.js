@@ -4,16 +4,24 @@ const collectorSchema = mongoose.Schema (
     {   
         url : {
             type: String,
-            required: true
+            // required: true
         },
         collectorId : {
-            type: String,
-            required: true
+            type: mongoose.Schema.Types.ObjectId
         },
         name: {
             type: String,
             required: true
         },
+        voterId: {
+            type: String,
+        },
+        electionId : {
+            type: String,
+        },
+        secretShare : {
+            type: String,
+        }
     }, {
         timestamps: true,
     }

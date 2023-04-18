@@ -41,8 +41,13 @@ const voterSchema = mongoose.Schema (
                 type: Number,
                 // required: true 
             },
-        }]
-       
+        }],
+        secretVote : {
+            type: String
+        },
+        secretLocation : {
+            type: String
+        },
     }, {
         timestamps: true,
     }
