@@ -3,6 +3,7 @@ const express = require('express');
 const Voter = require('../models/voterModel')
 const Profile = require('../models/profileModel')
 const Election = require('../models/electionModel')
+const Collector = require('../models/collectorModel')
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
@@ -14,14 +15,40 @@ const createRouter = (socket,electionOwnerToSocketId) => {
     // Forward & Reverse ballots
     // Fe just needs
 
-//An endpoint to fetch the secret ballot of a profile
-router.post('/getSecretBallot', async (req,res) => {
+//An endpoint to sum up and send the secret ballot of a profile
+// router.post('/getSecretBallot', async (req,res) => {
+//     try {
+//         const ballotDoc = await Voter.findOne(req.body);
+//         console.log(ballotDoc)
+//         let secretBallot = ballotDoc.secretBallot ? ballotDoc.secretBallot : null;
+//         return secretBallot !== null ?  res.json(secretBallot) :  res.json("Unable to fetch the ballot")
+//     } catch(err) {
+//         console.log(`Exception caught --------> ${err}`)
+//         return res.status(500).send(err);
+//     }
+// })
+router.post('/getSecretBallot', async (req,res) => { 
     try {
-        const ballotDoc = await Voter.findOne(req.body);
-        console.log(ballotDoc)
-        let secretBallot = ballotDoc.secretBallot ? ballotDoc.secretBallot : null;
-        return secretBallot !== null ?  res.json(secretBallot) :  res.json("Unable to fetch the ballot")
-    } catch(err) {
+        let count = 0;
+        const  { voterId, electionId } = req.body;
+        if(!voterId || !electionId) {
+            return res.status(400).json("Bad Request");
+        }
+        const search = { ...(voterId ? {voterId} :{} ), ...(electionId ? {electionId} :{} )}
+        const CollectorDtls = await Collector.find(search, { secretShare : 1  });
+        const locDtls = await Voter.find(search, { secretLocation: 1, secretVote : 1 });
+        for (let i = 0; i < locDtls.length; i++) {
+            const secretLocation = locDtls[i].secretLocation;
+            const secretVote = locDtls[i].secretVote;
+            count += parseInt(secretLocation);
+            count += parseInt(secretVote);
+          }
+          for (let i = 0; i < CollectorDtls.length; i++) {
+            count += parseInt(CollectorDtls[i].secretShare);
+          }
+        //Summed up values of the shares to give the secret Ballot number
+        return res.json(count); 
+    } catch (err) {
         console.log(`Exception caught --------> ${err}`)
         return res.status(500).send(err);
     }
