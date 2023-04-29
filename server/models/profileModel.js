@@ -10,6 +10,9 @@ const profileSchema = mongoose.Schema (
             type: String,
             required: true
         },
+        salt : {
+            type: String,
+        },
         profileId : {
             type: String,
             // required: true
@@ -18,6 +21,10 @@ const profileSchema = mongoose.Schema (
             type: String,
             required: true
         },
+        // this is a temp object saying what we expect the challenge to result in
+        challengeResult: {
+            type: String,
+        }
     }, {
         timestamps: true,
     }
