@@ -5,7 +5,6 @@ const Voter = require('../models/voterModel')
 
 const router = new express.Router();
 
-//An endpoint to fetch the secret ballot of a profile
 router.post('/updateCollectorDtls', async (req,res) => {
     try {
         const  { collectorId } = req.body;

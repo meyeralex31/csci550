@@ -31,6 +31,7 @@
   "scripts": {
     "start": "react-scripts start",
     "start-server": "node server/index.js",
+    "start-collectors": "nodemon server/collector.js",
     "start-local": "nodemon server/index.js",
     "start:location": "node location.js",
     "start:aes": "node aes.js",

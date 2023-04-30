@@ -51,20 +51,39 @@ function getRandomInt(max) {
     })
 
 //Display available Elections
-    router.post('/displayElections', async (req,res) => {
-        const electionId = req.body.electionId;
+router.post('/displayElections', async (req,res) => {
+    const electionId = req.body.electionId;
 
-        try {
-            const Elections = await Election.find({...(electionId ? {electionId} : {}) }, { adminProfileId: 1, collectors: 1,electionId: 1, electionTitle : 1 , questions: 1, REGISTRATION_STATUS : 1 });
-            return res.json(Elections)
-        } catch(e) {
-            console.log(`Exception caught --------> ${e}`)
-            return res.status(500).send(e);
-        }
-    })
-    return router;
+    try {
+        const Elections = await Election.find({...(electionId ? {electionId} : {}) }, { adminProfileId: 1, collectors: 1,electionId: 1, electionTitle : 1 , questions: 1, REGISTRATION_STATUS : 1 });
+        return res.json(Elections)
+    } catch(e) {
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
+    }
+})
+
+
+//Get Collector Ind location endpoints
+router.post('/getCollectorLocation', async (req,res) => {
+    const electionId = req.body.electionId;
+    try {
+        const collectorDtls = await Collector.find({...(electionId ? {electionId} : {}) }, { adminProfileId: 1, collectors: 1,electionId: 1, electionTitle : 1 , questions: 1, REGISTRATION_STATUS : 1 });
+         // add collector logic here
+         let collObj = []
+         let startPort = 3001
+         collectorDtls.map((collector, index) => {
+            collObj.push(`${startPort}/getShare`)
+            startPort++
+        })
+        return res.json(collObj)
+    } catch(e) {
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
+    }
+})
+
+return router;
 }
-
-
 
 module.exports = createRouter;

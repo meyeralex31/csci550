@@ -21,33 +21,53 @@ const Election = require('../models/electionModel');
 const collectors = require('../data/collector');
 const Collector = require('../models/collectorModel');
 
+//Importing Individual Collectors data and individual models
+const collectorInd = require('../data/collectorInd');
+const collectorOne = require('../models/collectorOneModel');
+const collectorTwo = require('../models/collectorTwoModel');
+const collectorThree = require('../models/collectorThreeModel');
+const collectorFour = require('../models/collectorFourModel');
+
 const importData = async () => {
     try {
         //Below code is to insert profiles in DB
-        await Profile.deleteMany()
+        // await Profile.deleteMany()
 
-        await Profile.insertMany(profiles);
+        // await Profile.insertMany(profiles);
 
         // Below code is to insert voters in DB
-        await Voter.deleteMany()
+        // await Voter.deleteMany()
 
-        await Voter.insertMany(voters);
+        // await Voter.insertMany(voters);
 
         //Below code is to insert election data to the DB
 
-        await Election.deleteMany()
+        // await Election.deleteMany()
 
-        await Election.insertMany(elections)
+        // await Election.insertMany(elections)
 
         //Below code is to insert collectors data to the DB
 
-        await Collector.deleteMany()
+        // await Collector.deleteMany()
 
-        await Collector.insertMany(collectors);
+        // await Collector.insertMany(collectors);
+
+        //Below code is to insert individual collector data to DB 
+
+        await collectorOne.deleteMany()
+        await collectorTwo.deleteMany()
+        await collectorThree.deleteMany()
+        await collectorFour.deleteMany()
+
+        await collectorOne.insertMany(collectorInd);
+        await collectorTwo.insertMany(collectorInd);
+        await collectorThree.insertMany(collectorInd);
+        await collectorFour.insertMany(collectorInd);
 
         process.exit()
 
     } catch (err) {
+        console.log(err)
         process.exit(1)
     }
 }
