@@ -23,6 +23,7 @@ import { useElectionContext } from "./Context/ElectionContext";
 import { VOTING_IN_PROGRESS_STATUS } from "./PublicElectionPage";
 import axios from "axios";
 import { useUser } from "./Context/UserContext";
+/* global BigInt */
 
 const VotingPage = () => {
   const [showVotingLocation, setShowVotingLocation] = useState(false);
@@ -38,7 +39,7 @@ const VotingPage = () => {
   const collectorSharesPrime = [];
   // we will obvisouly need to set this on server
   const [location, setLocation] = useState();
-  const totalVoters = 6;
+  const totalVoters = 6n;
   // end
   const redirect = () => {
     if (isElectionOwner) {
@@ -51,34 +52,32 @@ const VotingPage = () => {
     // will look like v, p, vPrime, and pPrime
     const itemToSumbit = questions.map((question) => {
       const answerID = answers[question._id];
-      const indexOfAnswer = question.options.findIndex(
-        (option) => option._id === answerID
+      const indexOfAnswer = BigInt(
+        question.options.findIndex((option) => option._id === answerID)
       );
-      if (indexOfAnswer < 0) {
+      if (indexOfAnswer < 0n) {
         console.error("cant find option or answer");
         return {};
       }
-      const powerV = location * question.options.length + indexOfAnswer;
-      const v = 2 ** powerV;
+      const optionsCount = BigInt(question.options.length);
+
+      const powerV = location * optionsCount + indexOfAnswer;
+      const v = 2n ** powerV;
       const p = collectorShares.reduce(
         (accumulator, currentValue) => accumulator + currentValue,
         v
       );
-      console.log(
-        "primed options location",
-        question.options.length - indexOfAnswer - 1
-      );
       const powerVPrime =
-        (totalVoters - location) * question.options.length +
-        (question.options.length - indexOfAnswer - 1);
-      const vPrime = 2 ** powerVPrime;
+        (totalVoters - location) * optionsCount +
+        (optionsCount - indexOfAnswer - 1n);
+      const vPrime = 2n ** powerVPrime;
       const pPrime = collectorSharesPrime.reduce(
         (accumulator, currentValue) => accumulator + currentValue,
         vPrime
       );
       return {
-        fowardBallot: p,
-        reverseBallot: pPrime,
+        fowardBallot: p.toString(),
+        reverseBallot: pPrime.toString(),
         questionId: question._id,
       };
     });
@@ -197,7 +196,7 @@ const VotingPage = () => {
                 </InputLabel>
                 <OutlinedInput
                   // disabled={true}
-                  value={location}
+                  value={`${location}`}
                   type={showVotingLocation ? "text" : "password"}
                   startAdornment={
                     <InputAdornment position="start">
@@ -205,7 +204,7 @@ const VotingPage = () => {
                     </InputAdornment>
                   }
                   onChange={(e) => {
-                    setLocation(Number(e.target.value));
+                    setLocation(BigInt(e.target.value));
                   }}
                   endAdornment={
                     <InputAdornment position="end">

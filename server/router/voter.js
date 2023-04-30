@@ -92,7 +92,7 @@ router.post('/registerVoter', async (req,res) => {
 
 router.post('/vote', async (req,res) => {
     try {
-        const  { electionId, profileId, questionsVotedOn } = req.body;
+        const { electionId, profileId, questionsVotedOn } = req.body;
         if(!electionId || !profileId) {
             return res.status(400).json("Bad Request");
         }
@@ -103,11 +103,9 @@ router.post('/vote', async (req,res) => {
         await Voter.findOneAndUpdate( { electionId, profileId }, {questionsVotedOn ,hasVoted: true, secretVote }, {
             upsert: true 
           });
-        // TODO we will need to let election owner know that a vote has happened
+        
 
-          if (electionOwnerToSocketId[electionId]) {
-            socket.to(electionOwnerToSocketId[electionId]).emit(`voted-${electionId}`, 'a user voted');
-          }
+        socket.emit(`voted-${electionId}`, 'a user voted')
 
         return res.status(200).send({hasVoted: true})
     } catch (e) {
@@ -122,8 +120,6 @@ router.get('/registerVoters', async (req,res) => {
         if(!electionId && !profileId) {
             return res.status(400).json("Bad Request");
         }
-        const secretLocation = getRandomInt(20);
-        Voter.findOneAndUpdate({electionId} , {secretLocation});
         const profiles = await Voter.find( { electionId }, {profileId: 1, hasRegistered: 1});
         const profilesNamesRegistered = await Promise.all(profiles.filter(profile => profile.hasRegistered).map((profile) =>{
             return Profile.findOne({profileId: profile.profileId}, {name: 1}).then(res => {
@@ -136,7 +132,26 @@ router.get('/registerVoters', async (req,res) => {
         return res.status(500).send(e);
     }
 })
-// TODO we will need to switch to bigInts for this
+
+router.get('/votedVoters', async (req,res) => {
+    try {
+        const  { electionId, profileId } = req.query;
+        if(!electionId && !profileId) {
+            return res.status(400).json("Bad Request");
+        }
+        const profiles = await Voter.find( { electionId,  hasVoted: true }, {profileId: 1, hasRegistered: 1});
+        console.log(profiles);
+        const profilesNamesVoted = await Promise.all(profiles.map((profile) =>{
+            return Profile.findOne({profileId: profile.profileId}, {name: 1}).then(res => {
+                return { name: res.name};
+            })
+        }));
+        return res.status(200).send({profilesNamesVoted})
+    } catch (e) {
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
+    }
+})
 router.get('/getResults', async (req,res) => {
     try {
         const  { electionId } = req.query;
@@ -154,14 +169,14 @@ router.get('/getResults', async (req,res) => {
                             currentQuestion.fowardBallot = question.fowardBallot;
                             console.log('hit does not exist', currentQuestion,question.fowardBallot )
                         } else {
-                            currentQuestion.fowardBallot += question.fowardBallot;
+                            currentQuestion.fowardBallot = `${BigInt(currentQuestion.fowardBallot) + BigInt(question.fowardBallot)}`;
                             console.log('hit does exist', currentQuestion,question.fowardBallot )
                         }
                         if (!currentQuestion.reverseBallot) {
                             currentQuestion.reverseBallot = question.reverseBallot;
 
                         } else {
-                            currentQuestion.reverseBallot += question.reverseBallot;
+                            currentQuestion.reverseBallot =  `${BigInt(currentQuestion.reverseBallot) + BigInt(question.reverseBallot)}`;
                         }
                     } else {
                         throw new Error('Could not tally results');

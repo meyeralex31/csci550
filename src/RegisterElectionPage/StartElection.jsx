@@ -10,6 +10,7 @@ import RegisterButton from "./RegisterButton";
 import TabPanel from "@mui/lab/TabPanel";
 import TabContext from "@mui/lab/TabContext";
 import Collectors from "./Collectors";
+import VotedTab from "./VotedTab";
 import RegisterVoters from "./RegisteredVoters";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StartVotingModal from "./StartVotingModal";
@@ -46,6 +47,7 @@ const StartElection = () => {
     registedVoters,
     hasVoted,
     collectorsSelectedIds,
+    profilesNamesVoted,
   } = useElectionContext();
   useEffect(() => {
     setCanStartElection(
@@ -126,7 +128,11 @@ const StartElection = () => {
                 >
                   <Tab label="Collectors" />
                   <Tab label="Questions" />
-                  <Tab label="Register Voters" />
+                  {status === REGISTRATION_STATUS ? (
+                    <Tab label="Register Voters" />
+                  ) : (
+                    <Tab label="Voted Voters" />
+                  )}
                 </Tabs>
                 <TabContext value={tabValue}>
                   <TabPanel value={0} style={{ maxHeight: "320px" }}>
@@ -135,9 +141,16 @@ const StartElection = () => {
                   <TabPanel value={1} style={{ maxHeight: "320px" }}>
                     <Questions questions={questions} />
                   </TabPanel>
-                  <TabPanel value={2} style={{ maxHeight: "320px" }}>
-                    <RegisterVoters />
-                  </TabPanel>
+
+                  {status === REGISTRATION_STATUS ? (
+                    <TabPanel value={2} style={{ maxHeight: "320px" }}>
+                      <RegisterVoters />
+                    </TabPanel>
+                  ) : (
+                    <TabPanel value={2} style={{ maxHeight: "320px" }}>
+                      <VotedTab />
+                    </TabPanel>
+                  )}
                 </TabContext>
               </Grid>
               <Grid
@@ -200,7 +213,7 @@ const StartElection = () => {
                       variant="contained"
                       color="warning"
                       onClick={() => setCloseElectionModalOpen(true)}
-                      // TODO disable if less than 2 people have voted
+                      disabled={profilesNamesVoted.length <= 2}
                     >
                       Close Voting
                     </Button>

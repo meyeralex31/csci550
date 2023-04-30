@@ -34,14 +34,15 @@ const voterSchema = mongoose.Schema (
                 type: String
             },
             fowardBallot : {
-                type: Number,
+                type: String,
                 // required: true 
             },
             reverseBallot : {
-                type: Number,
+                type: String,
                 // required: true 
             },
         }],
+        // TODO can we remove these? the vote is stored in questionsVotedOn and secret location will be stored on the collector
         secretVote : {
             type: String
         },

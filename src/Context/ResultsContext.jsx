@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+/* global BigInt */
 
 const ResultsContext = React.createContext({});
 const ResultsProvider = ({ children }) => {
@@ -43,7 +44,7 @@ const ResultsProvider = ({ children }) => {
           setQuestions(
             q.map((question) => {
               const chunkBallot = (ballot) => {
-                let binaryString = ballot?.toString(2).padStart(5, "0");
+                let binaryString = BigInt(ballot)?.toString(2).padStart(5, "0");
                 const targetLength =
                   Math.ceil(binaryString?.length / question?.options?.length) *
                   question?.options?.length;
@@ -76,10 +77,8 @@ const ResultsProvider = ({ children }) => {
               chunkBallot(question?.reverseBallot)
                 ?.reverse()
                 ?.forEach((chunck, index) => {
-                  console.log(chunck, index);
                   let voteLocation = chunck.indexOf("1");
                   if (voteLocation >= 0) {
-                    console.log("voteLocation", voteLocation);
                     setReverseBallotVoted((prev) => {
                       prev[index] = {
                         ...prev?.[index],

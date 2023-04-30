@@ -20,6 +20,8 @@ const ElectionProvider = ({ children }) => {
   const [collectorsSelectedIds, setCollectorsSelectedIds] = useState([]);
   const [registedVoters, setRegistedVoters] = useState([]);
   const [electionOwner, setElectionOwner] = useState([]);
+  const [profilesNamesVoted, setProfilesNamesVoted] = useState([]);
+
   const isElectionOwner = !!(
     profileId === electionOwner &&
     profileId &&
@@ -88,8 +90,23 @@ const ElectionProvider = ({ children }) => {
       });
     }
   }, [isElectionOwner, socketId]);
+
+  const getUsersVoted = () => {
+    axios
+      .get(
+        `http://localhost:8080/votedVoters?profileId=${profileId}&electionId=${searchParams.get(
+          "id"
+        )}`
+      )
+      .then((res) => {
+        setProfilesNamesVoted(res.data.profilesNamesVoted);
+      });
+  };
+  useEffect(getUsersVoted, []);
   useEffect(() => {
     socket.connect();
+    socket.on(`voted-${searchParams.get("id")}`, getUsersVoted);
+
     socket.on(`status-${searchParams.get("id")}`, (event) => {
       if (event?.status) {
         setStatus(event?.status);
@@ -98,8 +115,8 @@ const ElectionProvider = ({ children }) => {
 
     return () => {
       socket.off(`registered-${searchParams.get("id")}`, getRegisteredVoters);
+      socket.off(`voted-${searchParams.get("id")}`, () => {});
       socket.off(`status-${searchParams.get("id")}`, () => {});
-
       socket.disconnect();
     };
   }, [searchParams.get("id")]);
@@ -117,6 +134,7 @@ const ElectionProvider = ({ children }) => {
         registedVoters: isElectionOwner ? registedVoters : undefined,
         setStatus: isElectionOwner ? setStatus : undefined,
         isElectionOwner,
+        profilesNamesVoted,
         setRegistered,
         setCollectorsSelectedIds: isElectionOwner
           ? setCollectorsSelectedIds

@@ -17,6 +17,7 @@ const electionOwnerToSocketId = {};
 const profileRouter = require('../server/router/profile')
 const voterRouter = require('../server/router/voter')
 const electionRouter = require('../server/router/election')
+const collectorAdminRouter = require('./router/collectorAdmin');
 
 app.use(express.json());
 app.use(cors())
@@ -30,6 +31,8 @@ app.use((req, res, next) => {
 const port = process.env.PORT || 8080;
 
 app.use(profileRouter)
+app.use(collectorAdminRouter)
+
 app.use(voterRouter(io, electionOwnerToSocketId))
 app.use(electionRouter(io))
 

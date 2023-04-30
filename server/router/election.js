@@ -35,11 +35,13 @@ function getRandomInt(max) {
             if(!adminProfileId || !electionId) {
                 return res.status(400).json("Bad Request");
             }
-            // add collector logic here
-            collectors.map(async (collector, index) => {
-                let collectorEntry = new Collector({name: collector.id, voterId: adminProfileId, electionId, secretShare: getRandomInt(20) })
-                await collectorEntry.save();
-            })
+            if(REGISTRATION_STATUS === "Voting Started") {
+                // add collector logic here
+                collectors.map(async (collector, index) => {
+                    let collectorEntry = new Collector({name: collector.id, voterId: adminProfileId, electionId, secretShare: getRandomInt(20) })
+                    await collectorEntry.save();
+                })
+            }
             await Election.findOneAndUpdate( { adminProfileId,electionId }, {REGISTRATION_STATUS, collectors});
             socket.emit(`status-${electionId}`, {status: REGISTRATION_STATUS})
             // To see if it's started and to gen ind question shares & location of every user
