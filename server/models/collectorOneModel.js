@@ -16,6 +16,9 @@ const collectorSchema = mongoose.Schema (
         },
         secretShare : {
             type: String,
+        },
+        privateKey : {
+            type: String
         }
     }, {
         timestamps: true,

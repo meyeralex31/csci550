@@ -1,9 +1,9 @@
 const paillierBigint = require('paillier-bigint')
-const  extendedEuclideanAlgo = require('./extendedEuclideanAlgo');
+const  extendedEuclideanAlgo = require('./server/utilities/extendedEuclideanAlgo');
 const crypto = require('crypto');
 
 const n = 20;
-const numberOfCollectors = 100;
+const numberOfCollectors = 4;
 const createPi = () => {
     const pi = [...Array(n).keys()];
     for (let i = n - 1; i >= 0; i--) {
@@ -19,8 +19,11 @@ const firstPhase = (collectorOnePublicKey) => {
     return createPi().map((value) => collectorOnePublicKey.encrypt(value));
 
 }
+//3 rd collector -> shld shuffle shld be false. Everyone except second shld shuffle shld be false
+//prev Phase -> enc values
 const secondPhase = (publicKey, prevPhase, shouldShuffle) => {
-    // const pi = createPi(); 
+    // const pi = createPi();
+    console.log(`Public Key -----------> ${publicKey.n} and the prevPhase ------> ${prevPhase}`)
     const pi = shouldShuffle? createPi(): [...Array(n).keys()];
     const r = [];   
     const encryptedValues = pi.map((value, i) => {
@@ -36,6 +39,7 @@ const secondPhase = (publicKey, prevPhase, shouldShuffle) => {
 
 const lastPhase = (privateKey, encryptedValues) => {
     return encryptedValues.map((value) => privateKey.decrypt(value) )
+    //share of the first collector shares enc
 }
 
 const run = async () => {
@@ -54,12 +58,16 @@ const run = async () => {
 
 
     const r1 = lastPhase(collectorOnePrivateKey, encryptedValues);
+    
 
     // this happens on the ui when they get all values
     const locations = r1.map((value, i) => (value + ris.reduce((prev, curr) => prev + curr[i], 0n)) % BigInt(collectorOnePublicKey.n));
     const occurances = locations.reduce((prev, current) => prev[current] = prev[current] ? prev[current] + 1: 1, {});
     console.log('any duplicates', Object.keys(occurances).filter(key => occurances[key] > 1))
     console.log(locations);
+
+    //Voting
+    //gen random num(-ve 2^numofVoters+1 -> +ve 2^numofVoters+1)
 };
 
 
