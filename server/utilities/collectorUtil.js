@@ -62,36 +62,5 @@ const lastPhase = async (privateKey, encryptedValues) => {
     //share of the first collector shares enc
 }
 
-const run = async () => {
-    //  the private key should stay only where collector one knows it
-    const { publicKey: collectorOnePublicKey, privateKey: collectorOnePrivateKey } = await paillierBigint.generateRandomKeys(512)
-    let encryptedValues = firstPhase(collectorOnePublicKey);
-
-    const ris = [];
-    // the first collector already went
-    for (let i = 1; i < numberOfCollectors ; i ++) {
-        let ri;
-        // we need to shuffle with collector 1 or else collector 0 knows evveryones location
-        ({encryptedValues, r: ri} = secondPhase(collectorOnePublicKey, encryptedValues, i ===1));
-        ris.push(ri);
-    }
-
-
-    const r1 = lastPhase(collectorOnePrivateKey, encryptedValues);
-    console.log(r1)
-
-    // this happens on the ui when they get all values
-    const locations = r1.map((value, i) => (value + ris.reduce((prev, curr) => prev + curr[i], 0n)) % BigInt(collectorOnePublicKey.n));
-    const occurances = locations.reduce((prev, current) => prev[current] = prev[current] ? prev[current] + 1: 1, {});
-    console.log('any duplicates', Object.keys(occurances).filter(key => occurances[key] > 1))
-    console.log(locations);
-
-    //Voting
-    //Send it along with the shares
-    //gen random num(-ve 2^numofVoters+1 -> +ve 2^numofVoters+1)
-};
-
-
-// run();
 
 module.exports = { firstPhase , secondPhase, lastPhase};
