@@ -25,7 +25,7 @@ You will also need node(I am using version v14.15.3)
 [src/App.js](src/App.js) - contains the code to for the React Router
 
 [server](/server) - contains the code for both servers
-[server/data](/server/data/)- contains the data model
+[server/models](/server/models/)- contains the data model
 [server/db](/server/db/)- contains the connection to the db
 [server/router](/server/router/)- contains the code for the nodejs routes
 [server/utilities](/server/utilities/)- contains the code for any utlities used
