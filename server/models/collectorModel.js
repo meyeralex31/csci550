@@ -13,15 +13,6 @@ const collectorSchema = mongoose.Schema (
             type: String,
             required: true
         },
-        voterId: {
-            type: String,
-        },
-        electionId : {
-            type: String,
-        },
-        secretShare : {
-            type: String,
-        }
     }, {
         timestamps: true,
     }

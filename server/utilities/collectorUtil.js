@@ -4,14 +4,13 @@ const crypto = require('crypto');
 
 const { PublicKey } = require( 'paillier-bigint' );
 
-const n = 20;
 const numberOfCollectors = 4;
 
 // const pubKey = new PublicKey()
 
 const genObj = {}
 
-const createPi = () => {
+const createPi = (n) => {
     const pi = [...Array(n).keys()];
     for (let i = n - 1; i >= 0; i--) {
         const r = Math.floor(Math.random() *i);
@@ -22,9 +21,9 @@ const createPi = () => {
     return pi.map(v => BigInt(v));
 }
 
-const firstPhase = async () => {
+const firstPhase = async (numberOfVoters) => {
     const { publicKey: collectorOnePublicKey, privateKey: collectorOnePrivateKey } = await paillierBigint.generateRandomKeys(512)
-    return {"encValues" : createPi().map((value) => collectorOnePublicKey.encrypt(value)) , "publicKey" : collectorOnePublicKey, "privateKey" : collectorOnePrivateKey};
+    return {"encValues" : createPi(numberOfVoters).map((value) => collectorOnePublicKey.encrypt(value)) , "publicKey" : collectorOnePublicKey, "privateKey" : collectorOnePrivateKey};
 }
 
 //3 rd collector -> shld shuffle shld be false. Everyone except second shld shuffle shld be false
@@ -38,7 +37,7 @@ const secondPhase = async (initKey, prevPhase, shouldShuffle) => {
     console.log(`After allotment n: ${collectorOnePublicKey.n} and _n2: ${collectorOnePublicKey._n2 }`)
     console.log(typeof(publicKey))
     console.log(`Public Key -----------> ${collectorOnePublicKey.n} and the prevPhase ------> ${prevPhase}`)
-    const pi = shouldShuffle? createPi(): [...Array(n).keys()];
+    const pi = shouldShuffle? createPi(prevPhase.length): [...Array(prevPhase.length).keys()];
     const r = [];   
     const encryptedValues = pi.map((value, i) => {
         let ri = BigInt('0x' + crypto.randomBytes(64).toString('hex'))% collectorOnePublicKey.n;

@@ -28,6 +28,4 @@ router.get('/collectorDtls', async (req,res) => {
     }
 })
 
-// Validate the votes(using the hw formula in 3)
-
 module.exports = router;

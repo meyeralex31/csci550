@@ -7,79 +7,23 @@ const connectDB = require('./db/mongoose');
 connectDB()
 
 const collectorRouter = require('../server/router/collector')
-const collectorOneRouter = require('../server/router/collector/collectorOne')
+const generateCollectorOne = require('../server/router/collector/collectorOne')
 const collectorTwoRouter = require('../server/router/collector/collectorTwo')
 const collectorThreeRouter = require('../server/router/collector/collectorThree')
 const collectorFourRouter = require('../server/router/collector/collectorFour')
 
-
-const collectorOneApp = express()
-const collectorOneServer = http.createServer(collectorOneApp);
-
-const collectorTwoApp = express()
-const collectorTwoServer = http.createServer(collectorTwoApp);
-
-const collectorThreeApp = express()
-const collectorThreeServer = http.createServer(collectorThreeApp);
-
-const collectorFourApp = express()
-const collectorFourServer = http.createServer(collectorFourApp);
-
-// For collectors One, Two and Three
-collectorOneApp.use(express.json());
-collectorOneApp.use(cors())
-
-collectorTwoApp.use(express.json());
-collectorTwoApp.use(cors())
-
-collectorThreeApp.use(express.json());
-collectorThreeApp.use(cors())
-
-collectorFourApp.use(express.json());
-collectorFourApp.use(cors())
-
-collectorOneApp.use(collectorOneRouter)
-collectorTwoApp.use(collectorTwoRouter)
-collectorThreeApp.use(collectorThreeRouter)
-collectorFourApp.use(collectorFourRouter)
-
-
-
-const collectorAPort = process.env.collectorPORT || 3001;
-const collectorBPort = process.env.collectorPORT || 3002;
-const collectorCPort = process.env.collectorPORT || 3003;
-const collectorDPort = process.env.collectorPORT || 3004;
-
-collectorOneServer.listen(collectorAPort, () => {
-  console.log(`Collectors are listening on port ${collectorAPort}`)
+const collectors = [{port: '3001' , id: '6429c55c4cb576c0acd49c45'},
+  {port: '3002' , id: '643ea062d91b072364d6f885'},
+  {port: '3003' , id: '643ea063d91b072364d6f886'},
+  {port: '3004' , id: '643ea061d91b072364d6f884'}]
+collectors.forEach(({port, id}) => {
+  const collectorOneApp = express()
+  const collectorOneServer = http.createServer(collectorOneApp);
+  // For collectors One, Two and Three
+  collectorOneApp.use(express.json());
+  collectorOneApp.use(cors());
+  collectorOneApp.use(generateCollectorOne(id))
+  collectorOneServer.listen(port, () => {
+    console.log(`Collectors are listening on port ${collectorAPort}`)
+  })
 })
-
-collectorTwoServer.listen(collectorBPort, () => {
-console.log(`Collectors are listening on port ${collectorBPort}`)
-})
-
-collectorThreeServer.listen(collectorCPort, () => {
-console.log(`Collectors are listening on port ${collectorCPort}`)
-})
-
-collectorFourServer.listen(collectorDPort, () => {
-  console.log(`Collectors are listening on port ${collectorDPort}`)
- })
-
-
-
-//  //Collector A
-//  collectorOneApp.post('/CollectorOneInfo', async (req,res) => {
-//   try {
-//       const  { collectorId } = req.body;
-//       const { url } = req.body;
-//       if(!collectorId) {
-//           return res.status(400).json("Bad Request");
-//       }
-//       await Collector.findOneAndUpdate( { collectorId }, { url });
-//       return res.json({"type": "SUCCESS","message":"Collectors updated"})
-//   } catch(err) {
-//       console.log(`Exception caught --------> ${err}`)
-//       return res.status(500).send(err);
-//   }
-// })
