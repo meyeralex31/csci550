@@ -45,6 +45,9 @@ const electionSchema = mongoose.Schema (
         collectors: [{
                 type: String,
      }],
+     locationN:{
+        type: String,
+     }
     }, {
         timestamps: true,
     }

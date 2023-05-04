@@ -51,7 +51,6 @@ const generateRouter = (collectorId) => {
     // for each election get all shares for each question
     router.post('/getAllShares',async (req,res) => {} )
 
-
     router.post('/generateShares', async (req,res) => {
         try {
             const { step, electionId, questions, voters } = req.body;
@@ -75,13 +74,13 @@ const generateRouter = (collectorId) => {
                 const serializedEncValues = collectorShares.encryptedValues.map(value => value.toString()); 
                 const serializedRValues = collectorShares.r.map(value => value.toString());
                 await Promise.all(voters.map((voter, i) =>
-                    new collectorProfileModel({ collectorId, voterId: voter.voterId, electionId,locationShare: serializedRValues[i], 
+                    new collectorProfileModel({ collectorId, voterId: voter.profileId, electionId,locationShare: serializedRValues[i], 
                         secretShares: questions.map(({questionId}) => ({questionId, fowardShare: genVoterShares(voters.length), reverseShare: genVoterShares(voters.length)}))  }).save()
                 )); 
                 console.log(collectorShares);
                 const newCollectorElectionModel = new CollectorElectionModel(valuesToSave);
                 await newCollectorElectionModel.save();
-                return res.json({"type": "SUCCESS" , "encValues" : serializedEncValues , r : serializedRValues})
+                return res.json({"type": "SUCCESS" , "encValues" : serializedEncValues})
             }
         } catch (err) {
             console.log(`Exception caught --------> ${err}`)
@@ -91,7 +90,11 @@ const generateRouter = (collectorId) => {
 
     router.post('/decryptCollectorEncShares', async (req,res) => {
         try {
-            let { encValues, electionId, voters, questions} = req.body
+            let { encValues, electionId, voters, questions, publicKey} = req.body
+            const publicKeyObject = {};
+            for (const [key, value] of Object.entries(publicKey)) {
+                publicKeyObject[key] = BigInt(value); // Convert BigInt value to string
+            }
             let privateKey;
             let privateKeyHolder = await CollectorElectionModel.findOne({collectorId, electionId} ,{privateKey : 1})
             // for (let i = 0; i < privateKeyHolder.length; i++) {
@@ -108,11 +111,11 @@ const generateRouter = (collectorId) => {
             //     deserializedEncVals[key] = BigInt(value); // Convert String to BigInt
             // }
             const deserializedEncValues = encValues.map(value => BigInt(value)); 
-            let decryptedVals = await lastPhase(deserializedPrivateKeyObj , deserializedEncValues)
+            let decryptedVals = await lastPhase(publicKeyObject, deserializedPrivateKeyObj , deserializedEncValues)
             console.log(decryptedVals)
             const serializedDecValues = decryptedVals.map(value => value.toString());
-            await Promise.all(voters.map((voter, i) => new collectorProfileModel({ collectorId, voterId: voter.voterId, electionId,locationShare: serializedDecValues[i],secretShares: questions.map(({questionId}) => ({questionId, fowardShare: genVoterShares(voters.length), reverseShare: genVoterShares(voters.length)})) }).save()));  
-            return res.json({"type": "SUCCESS" , decryptedVals : serializedDecValues})
+            await Promise.all(voters.map((voter, i) => new collectorProfileModel({ collectorId, voterId: voter.profileId, electionId,locationShare: serializedDecValues[i],secretShares: questions.map(({questionId}) => ({questionId, fowardShare: genVoterShares(voters.length), reverseShare: genVoterShares(voters.length)})) }).save()));  
+            return res.json({"type": "SUCCESS" })
         } catch (err) {
             console.log(`Exception caught --------> ${err}`)
             return res.status(500).send(err);

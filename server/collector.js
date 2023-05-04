@@ -19,6 +19,6 @@ collectors.forEach(({port, id}) => {
   collectorOneApp.use(cors());
   collectorOneApp.use(generateCollectorOne(id))
   collectorOneServer.listen(port, () => {
-    console.log(`Collectors are listening on port ${collectorAPort}`)
+    console.log(`Collectors are listening on port ${port}`)
   })
 })

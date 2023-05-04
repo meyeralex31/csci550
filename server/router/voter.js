@@ -96,11 +96,7 @@ router.post('/vote', async (req,res) => {
         if(!electionId || !profileId) {
             return res.status(400).json("Bad Request");
         }
-        // TODO we will need to let election owner know that a vote has happened
-        // TODO we will need to run validation on ballots before we save them
-        //Produces the Vote
-        const secretVote = getRandomInt(20); 
-        await Voter.findOneAndUpdate( { electionId, profileId }, {questionsVotedOn ,hasVoted: true, secretVote }, {
+        await Voter.findOneAndUpdate( { electionId, profileId }, {questionsVotedOn ,hasVoted: true }, {
             upsert: true 
           });
         

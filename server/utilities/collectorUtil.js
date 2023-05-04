@@ -2,7 +2,7 @@ const paillierBigint = require('paillier-bigint')
 const  extendedEuclideanAlgo = require('./extendedEuclideanAlgo');
 const crypto = require('crypto');
 
-const { PublicKey } = require( 'paillier-bigint' );
+const { PublicKey, PrivateKey } = require( 'paillier-bigint' );
 
 const numberOfCollectors = 4;
 
@@ -29,13 +29,9 @@ const firstPhase = async (numberOfVoters) => {
 //3 rd collector -> shld shuffle shld be false. Everyone except second shld shuffle shld be false
 //prev Phase -> enc values
 const secondPhase = async (initKey, prevPhase, shouldShuffle) => {
-    // const pi = createPi(); 
-    const { publicKey : collectorOnePublicKey } = await paillierBigint.generateRandomKeys(512)
-    console.log(`Before allotment n: ${collectorOnePublicKey.n} and _n2: ${collectorOnePublicKey._n2 }`)
-    collectorOnePublicKey._n2 = initKey._n2
-    collectorOnePublicKey.n = initKey.n
+    const collectorOnePublicKey = new PublicKey(initKey.n, initKey.g);
     console.log(`After allotment n: ${collectorOnePublicKey.n} and _n2: ${collectorOnePublicKey._n2 }`)
-    console.log(typeof(publicKey))
+    console.log(typeof(collectorOnePublicKey))
     console.log(`Public Key -----------> ${collectorOnePublicKey.n} and the prevPhase ------> ${prevPhase}`)
     const pi = shouldShuffle? createPi(prevPhase.length): [...Array(prevPhase.length).keys()];
     const r = [];   
@@ -52,15 +48,13 @@ const secondPhase = async (initKey, prevPhase, shouldShuffle) => {
     return { encryptedValues, r};
 }
 
-const lastPhase = async (privateKey, encryptedValues) => {
-    const { privateKey: collectorOnePrivateKey } = await paillierBigint.generateRandomKeys(512)
-    collectorOnePrivateKey._p = privateKey._p
-    collectorOnePrivateKey._q = privateKey._q
-    collectorOnePrivateKey.lambda = privateKey.lambda
-    collectorOnePrivateKey.mu = privateKey.mu
+const lastPhase = async (publicKey, privateKey, encryptedValues) => {
+    const collectorOnePublicKey = new PublicKey(publicKey.n, publicKey.g);
+
+    const collectorOnePrivateKey = new PrivateKey(privateKey.lambda,privateKey.mu, collectorOnePublicKey, privateKey._p, privateKey._q)
     return encryptedValues.map((value) => collectorOnePrivateKey.decrypt(value) )
     //share of the first collector shares enc
 }
 
 
-module.exports = { firstPhase , secondPhase, lastPhase};
+module.exports = { firstPhase , secondPhase, lastPhase, createPi};

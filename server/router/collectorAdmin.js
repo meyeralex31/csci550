@@ -21,7 +21,7 @@ router.post('/updateCollectorDtls', async (req,res) => {
 
 router.get('/collectorDtls', async (req,res) => {
     try {
-        return res.json({"type": "SUCCESS", collectors: await Collector.find(undefined, {name: 1, collectorId: 1})})
+        return res.json({"type": "SUCCESS", collectors: await Collector.find(undefined, {name: 1, collectorId: 1, url: 1})})
     } catch(err) {
         console.log(`Exception caught --------> ${err}`)
         return res.status(500).send(err);
