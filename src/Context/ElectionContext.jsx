@@ -18,9 +18,12 @@ const ElectionProvider = ({ children }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [collectorsSelectedIds, setCollectorsSelectedIds] = useState([]);
+  const [collectorsUrl, setCollectorsUrls] = useState([]);
+
   const [registedVoters, setRegistedVoters] = useState([]);
   const [electionOwner, setElectionOwner] = useState([]);
   const [profilesNamesVoted, setProfilesNamesVoted] = useState([]);
+  const [locationN, setLocationN] = useState(0n);
 
   const isElectionOwner = !!(
     profileId === electionOwner &&
@@ -35,15 +38,19 @@ const ElectionProvider = ({ children }) => {
       navigate("/");
     } else {
       axios
-        .post("http://localhost:8080/displayElections", {
+        .post("http://localhost:8080/getElection", {
           electionId: searchParams.get("id"),
         })
         .then((res) => {
           setStatus(res.data[0]?.REGISTRATION_STATUS);
           setQuestions(res.data[0]?.questions);
-          setCollectorsSelectedIds([...res.data[0]?.collectors]);
+          setCollectorsSelectedIds(
+            res.data[0]?.collectors.map(({ collectorId }) => collectorId)
+          );
+          setCollectorsUrls(res.data[0]?.collectors.map(({ url }) => url));
           setTitle(res.data[0]?.electionTitle);
           setElectionOwner(res.data[0]?.adminProfileId);
+          setLocationN(res.data[0]?.locationN);
         });
     }
   }, [profileId]);
@@ -123,6 +130,7 @@ const ElectionProvider = ({ children }) => {
   return (
     <ElectionContext.Provider
       value={{
+        collectorsUrl,
         title,
         registered,
         status,
@@ -139,6 +147,7 @@ const ElectionProvider = ({ children }) => {
         setCollectorsSelectedIds: isElectionOwner
           ? setCollectorsSelectedIds
           : undefined,
+        locationN,
       }}
     >
       {children}

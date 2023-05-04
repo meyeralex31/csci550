@@ -71,11 +71,30 @@ function getRandomInt(max) {
 
 //Display available Elections
 router.post('/displayElections', async (req,res) => {
+
+    try {
+        const Elections = await Election.find({}, { adminProfileId: 1, collectors: 1,electionId: 1, electionTitle : 1 , questions: 1, REGISTRATION_STATUS : 1, locationN: 1 });
+        return res.json(Elections);
+    } catch(e) {
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
+    }
+})
+
+//Display available Elections
+router.post('/getElection', async (req,res) => {
     const electionId = req.body.electionId;
 
     try {
         const Elections = await Election.find({...(electionId ? {electionId} : {}) }, { adminProfileId: 1, collectors: 1,electionId: 1, electionTitle : 1 , questions: 1, REGISTRATION_STATUS : 1, locationN: 1 });
-        return res.json(Elections)
+        let collectors = undefined;
+        if (Elections?.[0]?.collectors) {
+            collectors =  await Promise.all(Elections?.[0]?.collectors?.map(async (id) => {
+                const {url} = await Collector.findOne({collectorId: id}, {url: 1});
+                return {url, collectorId: id};
+            }));
+        }
+        return res.json([{ ...Elections[0]._doc, collectors}])
     } catch(e) {
         console.log(`Exception caught --------> ${e}`)
         return res.status(500).send(e);

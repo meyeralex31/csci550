@@ -20,6 +20,8 @@ import BallotIcon from "@mui/icons-material/Ballot";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { useElectionContext } from "./Context/ElectionContext";
+import { useSharesContext } from "./Context/SharesContext";
+
 import { VOTING_IN_PROGRESS_STATUS } from "./PublicElectionPage";
 import axios from "axios";
 import { useUser } from "./Context/UserContext";
@@ -37,8 +39,8 @@ const VotingPage = () => {
   // TODO values we need to get from server
   const collectorShares = [];
   const collectorSharesPrime = [];
-  // we will obvisouly need to set this on server
-  const [location, setLocation] = useState();
+
+  const { location } = useSharesContext();
   const totalVoters = 6n;
   // end
   const redirect = () => {
@@ -195,7 +197,7 @@ const VotingPage = () => {
                   Location
                 </InputLabel>
                 <OutlinedInput
-                  // disabled={true}
+                  disabled={true}
                   value={`${location}`}
                   type={showVotingLocation ? "text" : "password"}
                   startAdornment={
@@ -203,9 +205,6 @@ const VotingPage = () => {
                       <LockIcon />
                     </InputAdornment>
                   }
-                  onChange={(e) => {
-                    setLocation(BigInt(e.target.value));
-                  }}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
