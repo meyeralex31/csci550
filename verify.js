@@ -57,7 +57,7 @@ const run = async (electionid, voterid) => {
     // admin
     // finds voter from VoterModel
     // for each question it will complete this
-    // p is fowardBallot in VoterModel and pPrime is reverseBallot
+    // p is forwardBallot  in VoterModel and pPrime is reverseBallot
     // it also needs to pass down p, pPrime, and questionId
     const Ss = await Promise.all(shares.map((_, index) => getVerification(index)));
     console.log(Ss);

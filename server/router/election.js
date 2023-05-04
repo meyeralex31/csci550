@@ -56,7 +56,7 @@ function getRandomInt(max) {
                     }
                 }
                 await axios.post(`${firstUrl}/decryptCollectorEncShares`, {electionId, voters, questions, encValues, publicKey });
-                await Election.findOneAndUpdate( { adminProfileId,electionId }, {REGISTRATION_STATUS, collectors, locationN: publicKey.n});
+                await Election.findOneAndUpdate( { adminProfileId,electionId }, {REGISTRATION_STATUS, collectors, locationN: publicKey.n, totalVoters: voters.length});
             } else {
                 await Election.findOneAndUpdate( { adminProfileId,electionId }, {REGISTRATION_STATUS});
             }
@@ -86,7 +86,7 @@ router.post('/getElection', async (req,res) => {
     const electionId = req.body.electionId;
 
     try {
-        const Elections = await Election.find({...(electionId ? {electionId} : {}) }, { adminProfileId: 1, collectors: 1,electionId: 1, electionTitle : 1 , questions: 1, REGISTRATION_STATUS : 1, locationN: 1 });
+        const Elections = await Election.find({...(electionId ? {electionId} : {}) }, { adminProfileId: 1, collectors: 1,electionId: 1, electionTitle : 1 , questions: 1, REGISTRATION_STATUS : 1, locationN: 1, totalVoters: 1 });
         let collectors = undefined;
         if (Elections?.[0]?.collectors) {
             collectors =  await Promise.all(Elections?.[0]?.collectors?.map(async (id) => {
@@ -95,26 +95,6 @@ router.post('/getElection', async (req,res) => {
             }));
         }
         return res.json([{ ...Elections[0]._doc, collectors}])
-    } catch(e) {
-        console.log(`Exception caught --------> ${e}`)
-        return res.status(500).send(e);
-    }
-})
-
-
-//Get Collector Ind location endpoints
-router.post('/getCollectorLocation', async (req,res) => {
-    const electionId = req.body.electionId;
-    try {
-        const collectorDtls = await Collector.find({...(electionId ? {electionId} : {}) }, { adminProfileId: 1, collectors: 1,electionId: 1, electionTitle : 1 , questions: 1, REGISTRATION_STATUS : 1 });
-         // add collector logic here
-         let collObj = []
-         let startPort = 3001
-         collectorDtls.map((collector, index) => {
-            collObj.push(`${startPort}/getShare`)
-            startPort++
-        })
-        return res.json(collObj)
     } catch(e) {
         console.log(`Exception caught --------> ${e}`)
         return res.status(500).send(e);

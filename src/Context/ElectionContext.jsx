@@ -7,6 +7,8 @@ import { io } from "socket.io-client";
 const socket = io("http://localhost:8080", {
   autoConnect: false,
 });
+/* global BigInt */
+
 const ElectionContext = React.createContext({});
 const ElectionProvider = ({ children }) => {
   const [title, setTitle] = useState("");
@@ -24,6 +26,7 @@ const ElectionProvider = ({ children }) => {
   const [electionOwner, setElectionOwner] = useState([]);
   const [profilesNamesVoted, setProfilesNamesVoted] = useState([]);
   const [locationN, setLocationN] = useState(0n);
+  const [totalVoters, setTotalVoters] = useState(0n);
 
   const isElectionOwner = !!(
     profileId === electionOwner &&
@@ -51,6 +54,7 @@ const ElectionProvider = ({ children }) => {
           setTitle(res.data[0]?.electionTitle);
           setElectionOwner(res.data[0]?.adminProfileId);
           setLocationN(res.data[0]?.locationN);
+          setTotalVoters(BigInt(res.data[0]?.totalVoters));
         });
     }
   }, [profileId]);
@@ -148,6 +152,7 @@ const ElectionProvider = ({ children }) => {
           ? setCollectorsSelectedIds
           : undefined,
         locationN,
+        totalVoters,
       }}
     >
       {children}

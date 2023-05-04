@@ -54,7 +54,7 @@ const ResultsProvider = ({ children }) => {
                 );
               };
               //reverse due to array, might want to look more into
-              chunkBallot(question?.fowardBallot)
+              chunkBallot(question?.forwardBallot)
                 ?.reverse()
                 ?.forEach((chunck, index) => {
                   let voteLocation = chunck.indexOf("1");

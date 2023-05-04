@@ -59,7 +59,7 @@ const verifyVoterLocation = async (shares, sharesPrime, v, vprime) => {
     // admin
     // finds voter from VoterModel
     // for each question it will complete this
-    // p is fowardBallot in VoterModel and pPrime is reverseBallot
+    // p is forwardBallot  in VoterModel and pPrime is reverseBallot
     // it also needs to pass down p, pPrime, and questionId
     // console.log(`Before conversion to BIGINT -> shares: ${shares}, sharesPrime:${sharesPrime}, v:${v}, vprime:${vprime}`)
     shares = shares.map(n => BigInt(n));

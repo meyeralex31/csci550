@@ -3,57 +3,11 @@ const express = require('express');
 const Voter = require('../models/voterModel')
 const Profile = require('../models/profileModel')
 const Election = require('../models/electionModel')
-const Collector = require('../models/collectorModel')
-
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
+const Collector = require('../models/collectorModel');
+const axios = require('axios');
 
 const createRouter = (socket,electionOwnerToSocketId) => {
     const router = new express.Router();
-
-    // Forward & Reverse ballots
-    // Fe just needs
-
-//An endpoint to sum up and send the secret ballot of a profile
-// router.post('/getSecretBallot', async (req,res) => {
-//     try {
-//         const ballotDoc = await Voter.findOne(req.body);
-//         console.log(ballotDoc)
-//         let secretBallot = ballotDoc.secretBallot ? ballotDoc.secretBallot : null;
-//         return secretBallot !== null ?  res.json(secretBallot) :  res.json("Unable to fetch the ballot")
-//     } catch(err) {
-//         console.log(`Exception caught --------> ${err}`)
-//         return res.status(500).send(err);
-//     }
-// })
-router.post('/getSecretBallot', async (req,res) => { 
-    try {
-        let count = 0;
-        const  { voterId, electionId } = req.body;
-        if(!voterId || !electionId) {
-            return res.status(400).json("Bad Request");
-        }
-        const search = { ...(voterId ? {voterId} :{} ), ...(electionId ? {electionId} :{} )}
-        const CollectorDtls = await Collector.find(search, { secretShare : 1  });
-        const locDtls = await Voter.find(search, { secretLocation: 1, secretVote : 1 });
-        for (let i = 0; i < locDtls.length; i++) {
-            const secretLocation = locDtls[i].secretLocation;
-            const secretVote = locDtls[i].secretVote;
-            count += parseInt(secretLocation);
-            count += parseInt(secretVote);
-          }
-          for (let i = 0; i < CollectorDtls.length; i++) {
-            count += parseInt(CollectorDtls[i].secretShare);
-          }
-        //Summed up values of the shares to give the secret Ballot number
-        return res.json(count); 
-    } catch (err) {
-        console.log(`Exception caught --------> ${err}`)
-        return res.status(500).send(err);
-    }
-})
-
 router.post('/getVoterDtls', async (req,res) => {
     try {
         const  { profileId, electionId } = req.body;
@@ -154,19 +108,27 @@ router.get('/getResults', async (req,res) => {
         if(!electionId) {
             return res.status(400).json("Bad Request");
         }
-        const election = await Election.findOne( {electionId}, { electionTitle: 1,questions: 1 }).lean();
+        const election = await Election.findOne( {electionId}, { electionTitle: 1,questions: 1, collectors: 1 }).lean();
         const voters = await Voter.find( { electionId, hasVoted: 1 }, {questionsVotedOn: 1});
+        const collectors =  await Promise.all(election?.collectors?.map(async (id) => {
+            return await Collector.findOne({collectorId: id}, {url: 1});
+        }));
+
+        const collectorResults = await Promise.all(collectors.map(({url}) => {
+            return axios.post(`${url}/getAllShares`, {electionId}).then(res => res.data);
+        }));
+
         voters.forEach((voter) => {
             if (voter?.questionsVotedOn) {
                 voter.questionsVotedOn.forEach((question) => {
                     const currentQuestion = election.questions.find((q) => q._id.equals(question.questionId));
                     if (currentQuestion) {
-                        if (!currentQuestion.fowardBallot) {
-                            currentQuestion.fowardBallot = question.fowardBallot;
-                            console.log('hit does not exist', currentQuestion,question.fowardBallot )
+                        if (!currentQuestion.forwardBallot ) {
+                            currentQuestion.forwardBallot  = question.forwardBallot ;
+                            console.log('hit does not exist', currentQuestion,question.forwardBallot  )
                         } else {
-                            currentQuestion.fowardBallot = `${BigInt(currentQuestion.fowardBallot) + BigInt(question.fowardBallot)}`;
-                            console.log('hit does exist', currentQuestion,question.fowardBallot )
+                            currentQuestion.forwardBallot  = `${BigInt(currentQuestion.forwardBallot ) + BigInt(question.forwardBallot )}`;
+                            console.log('hit does exist', currentQuestion,question.forwardBallot  )
                         }
                         if (!currentQuestion.reverseBallot) {
                             currentQuestion.reverseBallot = question.reverseBallot;
@@ -178,6 +140,19 @@ router.get('/getResults', async (req,res) => {
                         throw new Error('Could not tally results');
                     } 
                 });
+            }
+        })
+        election.questions = election.questions.map((question) => {
+            const forwardBallot = collectorResults.reduce((prev, res) => {
+                return prev -  BigInt(res.questions[question._id].fowardShare);
+            }, BigInt(question.forwardBallot)).toString();
+            const reverseBallot = collectorResults.reduce((prev, res) => {
+                return prev -  BigInt(res.questions[question._id].reverseShare);
+            }, BigInt(question.reverseBallot)).toString();
+            return {
+                ...question,
+                forwardBallot,
+                reverseBallot
             }
         })
 

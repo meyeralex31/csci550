@@ -29,19 +29,16 @@ import { useUser } from "./Context/UserContext";
 
 const VotingPage = () => {
   const [showVotingLocation, setShowVotingLocation] = useState(false);
-  const { isElectionOwner, status, questions, title } = useElectionContext();
+  const { isElectionOwner, status, questions, title, totalVoters } =
+    useElectionContext();
   const { profileId } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // this structure is { [electionId]: answer }
   const [answers, setAnswers] = useState({});
   const [allAnswersMade, setAllAnswersMade] = useState(false);
-  // TODO values we need to get from server
-  const collectorShares = [];
-  const collectorSharesPrime = [];
 
-  const { location } = useSharesContext();
-  const totalVoters = 6n;
+  const { location, questionShares } = useSharesContext();
   // end
   const redirect = () => {
     if (isElectionOwner) {
@@ -54,6 +51,7 @@ const VotingPage = () => {
     // will look like v, p, vPrime, and pPrime
     const itemToSumbit = questions.map((question) => {
       const answerID = answers[question._id];
+      const shares = questionShares[question._id];
       const indexOfAnswer = BigInt(
         question.options.findIndex((option) => option._id === answerID)
       );
@@ -65,20 +63,15 @@ const VotingPage = () => {
 
       const powerV = location * optionsCount + indexOfAnswer;
       const v = 2n ** powerV;
-      const p = collectorShares.reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        v
-      );
+      const p = v + shares.fowardShare;
       const powerVPrime =
-        (totalVoters - location) * optionsCount +
+        (totalVoters - location - 1n) * optionsCount +
         (optionsCount - indexOfAnswer - 1n);
       const vPrime = 2n ** powerVPrime;
-      const pPrime = collectorSharesPrime.reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        vPrime
-      );
+      const pPrime = vPrime + shares.reverseShare;
+      console.log({ shares, v, p, vPrime, pPrime });
       return {
-        fowardBallot: p.toString(),
+        forwardBallot: p.toString(),
         reverseBallot: pPrime.toString(),
         questionId: question._id,
       };

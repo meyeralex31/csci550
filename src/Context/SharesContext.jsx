@@ -13,6 +13,8 @@ const SharesProvider = ({ children }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [location, setLocation] = useState(-1n);
+  // { questionId:{reverseShare, forwardShare}}
+  const [questionShares, setQuestionShares] = useState();
   useEffect(() => {
     const getData = async () => {
       if (profileId && searchParams.get("id") && collectorsUrl.length) {
@@ -35,13 +37,35 @@ const SharesProvider = ({ children }) => {
             0n
           ) % BigInt(locationN)
         );
+        setQuestionShares(
+          results.reduce((prev, current) => {
+            current.secretShares.map(
+              ({ questionId, fowardShare, reverseShare }) => {
+                if (prev[questionId]) {
+                  prev[questionId] = {
+                    fowardShare:
+                      BigInt(fowardShare) + prev[questionId].fowardShare,
+                    reverseShare:
+                      BigInt(reverseShare) + prev[questionId].reverseShare,
+                  };
+                } else {
+                  prev[questionId] = {
+                    fowardShare: BigInt(fowardShare),
+                    reverseShare: BigInt(reverseShare),
+                  };
+                }
+              }
+            );
+            return prev;
+          }, {})
+        );
       }
     };
     getData();
   }, [profileId && searchParams.get("id") && collectorsUrl]);
 
   return (
-    <SharesContext.Provider value={{ location }}>
+    <SharesContext.Provider value={{ location, questionShares }}>
       {children}
     </SharesContext.Provider>
   );

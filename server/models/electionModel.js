@@ -47,6 +47,9 @@ const electionSchema = mongoose.Schema (
      }],
      locationN:{
         type: String,
+     },
+     totalVoters: {
+        type: Number,
      }
     }, {
         timestamps: true,
