@@ -33,6 +33,7 @@
     "start-server": "node server/index.js",
     "start-collectors": "nodemon server/collector.js",
     "start-local": "nodemon server/index.js",
+    "start-verify": "node verify.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

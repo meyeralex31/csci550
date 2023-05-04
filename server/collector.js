@@ -5,12 +5,7 @@ const connectDB = require('./db/mongoose');
 
 // To establish a MongoDB connection
 connectDB()
-
-const collectorRouter = require('../server/router/collector')
 const generateCollectorOne = require('../server/router/collector/collectorOne')
-const collectorTwoRouter = require('../server/router/collector/collectorTwo')
-const collectorThreeRouter = require('../server/router/collector/collectorThree')
-const collectorFourRouter = require('../server/router/collector/collectorFour')
 
 const collectors = [{port: '3001' , id: '6429c55c4cb576c0acd49c45'},
   {port: '3002' , id: '643ea062d91b072364d6f885'},
