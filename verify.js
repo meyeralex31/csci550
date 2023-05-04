@@ -44,6 +44,8 @@ const getS = (collectorIndex, publicKey, encrypted, privateKey) => {
 const getVerification = async (collectorIndex) => {
     //collector A
     const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(512)
+    // shares will come from db. 
+    // will need to pull from collectorProfileModel[electionId][voterId][questionId].fowardShare
     const encrypted = publicKey.encrypt(shares[collectorIndex]);
     const sValues = shares.map((_, index) => {
         if(index !== collectorIndex) return getS(index,publicKey, encrypted, privateKey)
@@ -53,6 +55,10 @@ const getVerification = async (collectorIndex) => {
 }
 const run = async (electionid, voterid) => {
     // admin
+    // finds voter from VoterModel
+    // for each question it will complete this
+    // p is fowardBallot in VoterModel and pPrime is reverseBallot
+    // it also needs to pass down p, pPrime, and questionId
     const Ss = await Promise.all(shares.map((_, index) => getVerification(index)));
     console.log(Ss);
 
