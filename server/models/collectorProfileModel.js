@@ -30,6 +30,6 @@ const collectorSchema = mongoose.Schema (
     }
 )
 
-const collectorProfileModel = mongoose.model("CollectorFour", collectorSchema);
+const collectorProfileModel = mongoose.model("CollectorProfileModel", collectorSchema);
 
 module.exports = collectorProfileModel;

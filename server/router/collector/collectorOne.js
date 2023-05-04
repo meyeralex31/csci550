@@ -10,9 +10,11 @@ const generateRouter = (collectorId) => {
     const router = new express.Router();
     router.post('/collectorProfileShares', async (req,res) => {
         try {
-            const  { electionId, voterId } = req.body;
+            const  {  electionId, voterId } = req.body;
             let response = await collectorProfileModel.findOne({collectorId, electionId, voterId} ,{secretShares : 1, locationShare: 1})
             return res.json({"type": "SUCCESS", response})
+            // let response = await collectorProfileModel.findOne({collectorId, electionId, voterId} ,{secretShares : 1, locationShare: 1})
+            // return res.json({"type": "SUCCESS", response})
         } catch(err) {
             console.log(`Exception caught --------> ${err}`)
             return res.status(500).send(err);
@@ -49,7 +51,17 @@ const generateRouter = (collectorId) => {
     // for each voter we need to verify there ballot is valid
     router.post('/verify',async (req,res) => {} )
     // for each election get all shares for each question
-    router.post('/getAllShares',async (req,res) => {} )
+    router.post('/getAllShares',async (req,res) => {
+        const  { electionId, voterId , questionId } = req.body;
+        try {
+            let resp = await collectorProfileModel.find({'secretShares.0.questionId': questionId, electionId , voterId}, {secretShares : 1})
+            console.log(resp)
+            return res.json({"type": "SUCCESS", resp})
+        } catch (err) {
+            console.log(`Exception caught --------> ${err}`)
+            return res.status(500).send(err);
+        }
+    })
 
     router.post('/generateShares', async (req,res) => {
         try {

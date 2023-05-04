@@ -33,7 +33,7 @@ const voterSchema = mongoose.Schema (
             questionId: {
                 type: String
             },
-            fowardBallot : {
+            forwardBallot : {
                 type: String,
                 // required: true 
             },
@@ -42,13 +42,6 @@ const voterSchema = mongoose.Schema (
                 // required: true 
             },
         }],
-        // TODO can we remove these? the vote is stored in questionsVotedOn and secret location will be stored on the collector
-        secretVote : {
-            type: String
-        },
-        secretLocation : {
-            type: String
-        },
     }, {
         timestamps: true,
     }

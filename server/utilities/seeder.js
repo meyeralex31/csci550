@@ -22,11 +22,15 @@ const collectors = require('../data/collector');
 const Collector = require('../models/collectorModel');
 
 //Importing Individual Collectors data and individual models
-const collectorInd = require('../data/collectorInd');
-const collectorOne = require('../models/collectorOneModel');
-const collectorTwo = require('../models/collectorTwoModel');
-const collectorThree = require('../models/collectorThreeModel');
-const collectorFour = require('../models/collectorFourModel');
+// const collectorInd = require('../data/collectorInd');
+// const collectorOne = require('../models/collectorOneModel');
+// const collectorTwo = require('../models/collectorTwoModel');
+// const collectorThree = require('../models/collectorThreeModel');
+// const collectorFour = require('../models/collectorFourModel');
+
+// Importing Collector Profile Data and the Model
+const collectorProfile = require('../data/collectorProfile');
+const CollectorProfile = require('../models/collectorProfileModel');
 
 const importData = async () => {
     try {
@@ -54,15 +58,22 @@ const importData = async () => {
 
         //Below code is to insert individual collector data to DB 
 
-        await collectorOne.deleteMany()
-        await collectorTwo.deleteMany()
-        await collectorThree.deleteMany()
-        await collectorFour.deleteMany()
+        // await collectorOne.deleteMany()
+        // await collectorTwo.deleteMany()
+        // await collectorThree.deleteMany()
+        // await collectorFour.deleteMany()
 
-        await collectorOne.insertMany(collectorInd);
-        await collectorTwo.insertMany(collectorInd);
-        await collectorThree.insertMany(collectorInd);
-        await collectorFour.insertMany(collectorInd);
+        // await collectorOne.insertMany(collectorInd);
+        // await collectorTwo.insertMany(collectorInd);
+        // await collectorThree.insertMany(collectorInd);
+        // await collectorFour.insertMany(collectorInd);
+
+        //Below code is to insert Collector Profile Information
+        // await Voter.deleteMany()
+        // await Voter.insertMany(voters)
+
+        await CollectorProfile.deleteMany()
+        await CollectorProfile.insertMany(collectorProfile)
 
         process.exit()
 
