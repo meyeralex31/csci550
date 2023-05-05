@@ -63,7 +63,10 @@ const ResultsProvider = ({ children }) => {
                     setBallotVoted((prev) => {
                       prev[index] = {
                         ...prev?.[index],
-                        [question._id]: voteLocation,
+                        [question._id]: {
+                          voteLocation,
+                          valid: chunck.match(/1/g).length,
+                        },
                       };
                       return prev;
                     });
@@ -82,7 +85,10 @@ const ResultsProvider = ({ children }) => {
                     setReverseBallotVoted((prev) => {
                       prev[index] = {
                         ...prev?.[index],
-                        [question._id]: voteLocation,
+                        [question._id]: {
+                          voteLocation,
+                          valid: chunck.match(/1/g).length,
+                        },
                       };
                       return prev;
                     });
