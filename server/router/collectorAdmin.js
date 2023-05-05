@@ -6,7 +6,6 @@ const Election = require('../models/electionModel')
 const CollectorProfileModel = require('../models/collectorProfileModel')
 const Voter = require('../models/voterModel')
 
-const { verifyVoterLocation } = require('../utilities/verifyLocation')
 
 const router = new express.Router();
 
@@ -49,7 +48,6 @@ router.post('/verify',async (req,res) => {
             await verifyVoterLocation(forwardShare,reverseShare,vshares,vprimeShares)
 
         })
-        // console.log(vshares)
         return res.json({"type": "SUCCESS"})
     } catch (err) {
         console.log(`Exception caught --------> ${err}`)

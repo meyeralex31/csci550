@@ -3,8 +3,8 @@ const express = require('express');
 const collectorProfileModel = require('../../models/collectorProfileModel')
 const CollectorElectionModel = require('../../models/collectorElectionModel')
 
-const { firstPhase, secondPhase } = require('../../utilities/collectorUtil')
-const { lastPhase } = require('../../utilities/collectorUtil')
+const { firstPhase, secondPhase,lastPhase } = require('../../utilities/collectorUtil')
+const { getVerification, otherCollectorVerification } = require('../../utilities/verifyVoteCollectors')
 
 const generateRouter = (collectorId) => {
     const router = new express.Router();
@@ -21,7 +21,6 @@ const generateRouter = (collectorId) => {
 
     const stage1 = async (voters) => {
         let collectorShares = await firstPhase(voters.length);
-        console.log(collectorShares)
             
         let { encValues , publicKey, privateKey} = collectorShares
         delete privateKey.publicKey;
@@ -39,17 +38,18 @@ const generateRouter = (collectorId) => {
     }
 
     function genVoterShares(numofVoters, numOfOptions) {
-        const min = -Math.pow(2, numofVoters * numOfOptions) + 1;
         const max = Math.pow(2, numofVoters * numOfOptions) + 1;
-        const randomNum = Math.floor(Math.random() * (max - min)) + min;
-        return randomNum;
+        return Math.floor(Math.random() * (max));
     }
 
     router.post('/getAllShares',async (req,res) => {
-        const  { electionId } = req.body;
+        const  { electionId, voterNotVoted } = req.body;
         try {
-            let resp = await collectorProfileModel.find({ electionId, collectorId }, {secretShares : 1})
+            let resp = await collectorProfileModel.find({ electionId, collectorId }, {secretShares : 1, voterId: 1})
             const questions = resp.reduce((prev, current) => {
+                if (voterNotVoted.includes(current.voterId)) {
+                    return prev;
+                }
                 current.secretShares.map(
                   ({ questionId, fowardShare, reverseShare }) => {
                     if (prev[questionId]) {
@@ -68,9 +68,7 @@ const generateRouter = (collectorId) => {
                   }
                 );
                 return prev;
-              }, {});
-              console.log({resp});
-    
+              }, {});    
             return res.json({"type": "SUCCESS", questions})
         } catch (err) {
             console.log(`Exception caught --------> ${err}`)
@@ -78,12 +76,23 @@ const generateRouter = (collectorId) => {
         }
     })
 
-    router.post('/validate',async (req,res) => {
-        const  { electionId, voterId , questionId } = req.body;
+    router.post('/validate/second', async (req, res) => {
+        
         try {
-            let resp = await collectorProfileModel.find({'secretShares.0.questionId': questionId, electionId , voterId}, {secretShares : 1})
-            console.log(resp)
-            return res.json({"type": "SUCCESS", resp})
+            const  { electionId, voterId,publicKey, encryptedValues  } = req.body;
+            let {secretShares} = await collectorProfileModel.findOne({electionId , voterId, collectorId}, {secretShares : 1})
+            return res.json({"type": "SUCCESS", res: otherCollectorVerification(publicKey, encryptedValues,secretShares)})
+        } catch (err) {
+            console.log(`Exception caught --------> ${err}`)
+            return res.status(500).send(err);
+        };
+    });
+
+    router.post('/validate',async (req,res) => {
+        const  { electionId, voterId, otherCollectorsUrl, questionsVotedOn } = req.body;
+        try {
+            let {secretShares} = await collectorProfileModel.findOne({electionId , voterId, collectorId}, {secretShares : 1})
+            return res.json({"type": "SUCCESS", res: await getVerification(otherCollectorsUrl,secretShares,questionsVotedOn,electionId, voterId )})
         } catch (err) {
             console.log(`Exception caught --------> ${err}`)
             return res.status(500).send(err);
@@ -115,7 +124,6 @@ const generateRouter = (collectorId) => {
                     new collectorProfileModel({ collectorId, voterId: voter.profileId, electionId,locationShare: serializedRValues[i], 
                         secretShares: questions.map(({_id, options}) => ({questionId: _id, fowardShare: genVoterShares(voters.length, options.length), reverseShare: genVoterShares(voters.length,options.length)}))  }).save()
                 )); 
-                console.log(collectorShares);
                 const newCollectorElectionModel = new CollectorElectionModel(valuesToSave);
                 await newCollectorElectionModel.save();
                 return res.json({"type": "SUCCESS" , "encValues" : serializedEncValues})
@@ -150,7 +158,6 @@ const generateRouter = (collectorId) => {
             // }
             const deserializedEncValues = encValues.map(value => BigInt(value)); 
             let decryptedVals = await lastPhase(publicKeyObject, deserializedPrivateKeyObj , deserializedEncValues)
-            console.log(decryptedVals)
             const serializedDecValues = decryptedVals.map(value => value.toString());
             await Promise.all(voters.map((voter, i) => new collectorProfileModel({ collectorId, voterId: voter.profileId, electionId,locationShare: serializedDecValues[i],secretShares: questions.map(({_id, options}) => ({questionId: _id, fowardShare: genVoterShares(voters.length, options.length), reverseShare: genVoterShares(voters.length,  options.length)})) }).save()));  
             return res.json({"type": "SUCCESS" })

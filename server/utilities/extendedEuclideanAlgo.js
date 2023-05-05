@@ -21,7 +21,4 @@ const extendedEuclideanAlgo = (a, b) => {
     return t;
 }
 
-
-// console.log(extendedEuclideanAlgo(9987n, 3125n));
-
 module.exports = extendedEuclideanAlgo;

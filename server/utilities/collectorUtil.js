@@ -30,9 +30,6 @@ const firstPhase = async (numberOfVoters) => {
 //prev Phase -> enc values
 const secondPhase = async (initKey, prevPhase, shouldShuffle) => {
     const collectorOnePublicKey = new PublicKey(initKey.n, initKey.g);
-    console.log(`After allotment n: ${collectorOnePublicKey.n} and _n2: ${collectorOnePublicKey._n2 }`)
-    console.log(typeof(collectorOnePublicKey))
-    console.log(`Public Key -----------> ${collectorOnePublicKey.n} and the prevPhase ------> ${prevPhase}`)
     const pi = shouldShuffle? createPi(prevPhase.length): [...Array(prevPhase.length).keys()];
     const r = [];   
     const encryptedValues = pi.map((value, i) => {

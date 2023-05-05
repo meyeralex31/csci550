@@ -5,7 +5,7 @@ const Profile = require('../models/profileModel')
 const Election = require('../models/electionModel')
 const Collector = require('../models/collectorModel');
 const axios = require('axios');
-
+const {validateVote} = require('../utilities/validation');
 const createRouter = (socket,electionOwnerToSocketId) => {
     const router = new express.Router();
 router.post('/getVoterDtls', async (req,res) => {
@@ -50,6 +50,11 @@ router.post('/vote', async (req,res) => {
         if(!electionId || !profileId) {
             return res.status(400).json("Bad Request");
         }
+        if (!(await validateVote(electionId, profileId, questionsVotedOn))) {
+            throw new Error('Invalid vote')
+        } else {
+            console.log('Vote is valid');
+        }
         await Voter.findOneAndUpdate( { electionId, profileId }, {questionsVotedOn ,hasVoted: true }, {
             upsert: true 
           });
@@ -90,7 +95,6 @@ router.get('/votedVoters', async (req,res) => {
             return res.status(400).json("Bad Request");
         }
         const profiles = await Voter.find( { electionId,  hasVoted: true }, {profileId: 1, hasRegistered: 1});
-        console.log(profiles);
         const profilesNamesVoted = await Promise.all(profiles.map((profile) =>{
             return Profile.findOne({profileId: profile.profileId}, {name: 1}).then(res => {
                 return { name: res.name};
@@ -109,26 +113,26 @@ router.get('/getResults', async (req,res) => {
             return res.status(400).json("Bad Request");
         }
         const election = await Election.findOne( {electionId}, { electionTitle: 1,questions: 1, collectors: 1 }).lean();
-        const voters = await Voter.find( { electionId, hasVoted: 1 }, {questionsVotedOn: 1});
+        const voters = await Voter.find( { electionId }, {questionsVotedOn: 1, hasVoted: 1,hasRegistered: 1,profileId: 1 });
+        const votedVoters = voters.filter((voter) => voter.hasVoted);
+        const voterNotVoted = voters.filter((voter) => !voter.hasVoted && voter.hasRegistered).map(({profileId}) => profileId);
         const collectors =  await Promise.all(election?.collectors?.map(async (id) => {
             return await Collector.findOne({collectorId: id}, {url: 1});
         }));
 
         const collectorResults = await Promise.all(collectors.map(({url}) => {
-            return axios.post(`${url}/getAllShares`, {electionId}).then(res => res.data);
+            return axios.post(`${url}/getAllShares`, {electionId, voterNotVoted}).then(res => res.data);
         }));
 
-        voters.forEach((voter) => {
+        votedVoters.forEach((voter) => {
             if (voter?.questionsVotedOn) {
                 voter.questionsVotedOn.forEach((question) => {
                     const currentQuestion = election.questions.find((q) => q._id.equals(question.questionId));
                     if (currentQuestion) {
                         if (!currentQuestion.forwardBallot ) {
                             currentQuestion.forwardBallot  = question.forwardBallot ;
-                            console.log('hit does not exist', currentQuestion,question.forwardBallot  )
                         } else {
                             currentQuestion.forwardBallot  = `${BigInt(currentQuestion.forwardBallot ) + BigInt(question.forwardBallot )}`;
-                            console.log('hit does exist', currentQuestion,question.forwardBallot  )
                         }
                         if (!currentQuestion.reverseBallot) {
                             currentQuestion.reverseBallot = question.reverseBallot;

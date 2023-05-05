@@ -30,7 +30,6 @@ const SharesProvider = ({ children }) => {
               })
           )
         );
-        console.log(results);
         setLocation(
           results.reduce(
             (prev, current) => prev + BigInt(current.locationShare),

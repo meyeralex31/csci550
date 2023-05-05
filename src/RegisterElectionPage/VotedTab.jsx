@@ -5,7 +5,6 @@ import React from "react";
 import { useElectionContext } from "../Context/ElectionContext";
 const VotedTab = () => {
   const { profilesNamesVoted } = useElectionContext();
-  console.log(profilesNamesVoted);
   return (
     <List
       sx={{

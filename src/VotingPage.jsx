@@ -69,7 +69,7 @@ const VotingPage = () => {
         (optionsCount - indexOfAnswer - 1n);
       const vPrime = 2n ** powerVPrime;
       const pPrime = vPrime + shares.reverseShare;
-      console.log({ shares, v, p, vPrime, pPrime });
+      console.log({ location, indexOfAnswer, v, vPrime, shares, p, pPrime });
       return {
         forwardBallot: p.toString(),
         reverseBallot: pPrime.toString(),
