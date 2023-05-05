@@ -74,7 +74,6 @@ const Create = () => {
                 <React.Fragment key={questionIndex}>
                   <Grid item xs={12}>
                     <TextField
-                      //  TODO make the first required
                       required
                       fullWidth
                       id="outlined-required"

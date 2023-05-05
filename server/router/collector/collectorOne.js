@@ -38,17 +38,13 @@ const generateRouter = (collectorId) => {
         return { privateKey: JSON.stringify(serializedPrivateKey), serializedEncValues, serializedPublicKey }
     }
 
-    function genVoterShares(numofVoters) {
-        const min = -Math.pow(2, numofVoters * 5) + 1;
-        const max = Math.pow(2, numofVoters * 5) + 1;
+    function genVoterShares(numofVoters, numOfOptions) {
+        const min = -Math.pow(2, numofVoters * numOfOptions) + 1;
+        const max = Math.pow(2, numofVoters * numOfOptions) + 1;
         const randomNum = Math.floor(Math.random() * (max - min)) + min;
         return randomNum;
     }
 
-    // TODO 
-    // for each voter we need to verify there ballot is valid
-    router.post('/verify',async (req,res) => {} )
-    // for each election get all shares for each question
     router.post('/getAllShares',async (req,res) => {
         const  { electionId } = req.body;
         try {
@@ -117,7 +113,7 @@ const generateRouter = (collectorId) => {
                 const serializedRValues = collectorShares.r.map(value => value.toString());
                 await Promise.all(voters.map((voter, i) =>
                     new collectorProfileModel({ collectorId, voterId: voter.profileId, electionId,locationShare: serializedRValues[i], 
-                        secretShares: questions.map(({_id}) => ({questionId: _id, fowardShare: genVoterShares(voters.length), reverseShare: genVoterShares(voters.length)}))  }).save()
+                        secretShares: questions.map(({_id, options}) => ({questionId: _id, fowardShare: genVoterShares(voters.length, options.length), reverseShare: genVoterShares(voters.length,options.length)}))  }).save()
                 )); 
                 console.log(collectorShares);
                 const newCollectorElectionModel = new CollectorElectionModel(valuesToSave);
@@ -156,7 +152,7 @@ const generateRouter = (collectorId) => {
             let decryptedVals = await lastPhase(publicKeyObject, deserializedPrivateKeyObj , deserializedEncValues)
             console.log(decryptedVals)
             const serializedDecValues = decryptedVals.map(value => value.toString());
-            await Promise.all(voters.map((voter, i) => new collectorProfileModel({ collectorId, voterId: voter.profileId, electionId,locationShare: serializedDecValues[i],secretShares: questions.map(({_id}) => ({questionId: _id, fowardShare: genVoterShares(voters.length), reverseShare: genVoterShares(voters.length)})) }).save()));  
+            await Promise.all(voters.map((voter, i) => new collectorProfileModel({ collectorId, voterId: voter.profileId, electionId,locationShare: serializedDecValues[i],secretShares: questions.map(({_id, options}) => ({questionId: _id, fowardShare: genVoterShares(voters.length, options.length), reverseShare: genVoterShares(voters.length,  options.length)})) }).save()));  
             return res.json({"type": "SUCCESS" })
         } catch (err) {
             console.log(`Exception caught --------> ${err}`)

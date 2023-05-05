@@ -31,7 +31,6 @@ const Results = () => {
                 Winners
               </Grid>
               {questions?.map((question, index) => {
-                // TODO handle ties
                 const winner = question?.options?.[question.choosenIndex];
                 return (
                   <Grid item xs={4} key={index} style={{ textAlign: "center" }}>

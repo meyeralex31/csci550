@@ -1,7 +1,8 @@
 const express = require('express');
 const axios = require('axios')
 
-const Collector = require('../models/collectorModel')
+const Collector = require('../models/collectorModel');
+const Election = require('../models/electionModel')
 const CollectorProfileModel = require('../models/collectorProfileModel')
 const Voter = require('../models/voterModel')
 
@@ -30,8 +31,11 @@ router.post('/verify',async (req,res) => {
     try {
         let { electionId, voterId } = req.body;
         let voters = await Voter.findOne({electionId, profileId : voterId})
-        let voterObj = voters.toObject()
-        let ports = ['3001','3002','3003','3004']
+        let voterObj = voters.toObject();
+        const Elections = await Election.find({electionId}, { collectors: 1});
+        const collectors = await Promise.all(Elections?.[0]?.collectors?.map(async (id) => {
+                return  await Collector.findOne({collectorId: id}, {url: 1});
+        }));
         voterObj.questionsVotedOn.map(async (question,index) => {
             let vshares = []
             let vprimeShares = []
@@ -39,7 +43,7 @@ router.post('/verify',async (req,res) => {
             let reverseShare = []
             vshares.push(question.forwardBallot)
             vprimeShares.push(question.reverseBallot)
-            let { data } = await axios.post(`http://localhost:${ports[index]}/validate`, {electionId, voterId, questionId: question.questionId })
+            let { data } = await axios.post(`${collectors[index].url}/validate`, {electionId, voterId, questionId: question.questionId })
             forwardShare.push(data.resp[0].secretShares[0].fowardShare)
             reverseShare.push(data.resp[0].secretShares[0].reverseShare)
             await verifyVoterLocation(forwardShare,reverseShare,vshares,vprimeShares)
