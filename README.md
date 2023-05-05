@@ -15,8 +15,10 @@ You will also need node(I am using version v14.15.3)
 `npm run start-collectors` will start the collectors on http://localhost:3001 - http://localhost:3004
 
 # Connecting to the Mongo db
+You can connect to mongoDB compass through this connection string: 
+mongodb+srv://cryptoEVote:ionodeuser9124@crypto.5vefsns.mongodb.net/?retryWrites=true&w=majority
 
-#TODO
+We can also connect with mongoose from the Backend code base with the same connection string
 
 # file structure
 
