@@ -3,8 +3,9 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import React from "react";
 import { useElectionContext } from "../Context/ElectionContext";
-const RegisterVoters = () => {
-  const { registedVoters } = useElectionContext();
+const VotedTab = () => {
+  const { profilesNamesVoted } = useElectionContext();
+  console.log(profilesNamesVoted);
   return (
     <List
       sx={{
@@ -19,7 +20,7 @@ const RegisterVoters = () => {
       }}
       subheader={<li />}
     >
-      {registedVoters?.map((voter) => (
+      {profilesNamesVoted?.map((voter) => (
         <ListItem key={`item-${voter.name}`}>
           <ListItemText primary={voter.name} />
         </ListItem>
@@ -28,4 +29,4 @@ const RegisterVoters = () => {
   );
 };
 
-export default RegisterVoters;
+export default VotedTab;

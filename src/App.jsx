@@ -13,6 +13,9 @@ import PublicElection from "./PublicElectionPage";
 import VotingPage from "./VotingPage";
 import Results from "./Results/Results";
 import ElectionProvider from "./Context/ElectionContext";
+import ResultsProvider from "./Context/ResultsContext";
+import SharesProvider from "./Context/SharesContext";
+
 const App = () => {
   return (
     <UserProvider>
@@ -67,16 +70,22 @@ const App = () => {
           <Route
             path="/votingPage"
             element={
-              <RequireAuth>
-                <VotingPage />
-              </RequireAuth>
+              <ElectionProvider>
+                <RequireAuth>
+                  <SharesProvider>
+                    <VotingPage />
+                  </SharesProvider>
+                </RequireAuth>
+              </ElectionProvider>
             }
           />
           <Route
             path="/results"
             element={
               <RequireAuth>
-                <Results />
+                <ResultsProvider>
+                  <Results />
+                </ResultsProvider>
               </RequireAuth>
             }
           />

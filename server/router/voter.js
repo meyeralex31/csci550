@@ -2,23 +2,12 @@ const express = require('express');
 
 const Voter = require('../models/voterModel')
 const Profile = require('../models/profileModel')
+const Election = require('../models/electionModel')
+const Collector = require('../models/collectorModel');
+const axios = require('axios');
 
 const createRouter = (socket,electionOwnerToSocketId) => {
     const router = new express.Router();
-
-//An endpoint to fetch the secret ballot of a profile
-router.post('/getSecretBallot', async (req,res) => {
-    try {
-        const ballotDoc = await Voter.findOne(req.body);
-        console.log(ballotDoc)
-        let secretBallot = ballotDoc.secretBallot ? ballotDoc.secretBallot : null;
-        return secretBallot !== null ?  res.json(secretBallot) :  res.json("Unable to fetch the ballot")
-    } catch(err) {
-        console.log(`Exception caught --------> ${err}`)
-        return res.status(500).send(err);
-    }
-})
-
 router.post('/getVoterDtls', async (req,res) => {
     try {
         const  { profileId, electionId } = req.body;
@@ -26,7 +15,7 @@ router.post('/getVoterDtls', async (req,res) => {
             return res.status(400).json("Bad Request");
         }
         const search = { ...(profileId ? {profileId} :{} ), ...(electionId ? {electionId} :{} )}
-        const VoterDtls = await Voter.find(search, { electionId : 1 , hasRegistered : 1, isElectionOwner: 1 });
+        const VoterDtls = await Voter.find(search, { electionId : 1 , hasRegistered : 1,hasVoted: 1, isElectionOwner: 1 });
         return res.json(VoterDtls);
     } catch(e) {
         console.log(`Exception caught --------> ${e}`)
@@ -40,6 +29,7 @@ router.post('/registerVoter', async (req,res) => {
         if(!electionId || !profileId) {
             return res.status(400).json("Bad Request");
         }
+        // let genSecretLocation = `${electionId}-${profileId}-${Date.now().toString(36)}`;
         await Voter.findOneAndUpdate( { electionId, profileId }, {hasRegistered}, {
             upsert: true 
           });
@@ -54,11 +44,30 @@ router.post('/registerVoter', async (req,res) => {
     }
 })
 
+router.post('/vote', async (req,res) => {
+    try {
+        const { electionId, profileId, questionsVotedOn } = req.body;
+        if(!electionId || !profileId) {
+            return res.status(400).json("Bad Request");
+        }
+        await Voter.findOneAndUpdate( { electionId, profileId }, {questionsVotedOn ,hasVoted: true }, {
+            upsert: true 
+          });
+        
+
+        socket.emit(`voted-${electionId}`, 'a user voted')
+
+        return res.status(200).send({hasVoted: true})
+    } catch (e) {
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
+    }
+})
+
 router.get('/registerVoters', async (req,res) => {
     try {
         const  { electionId, profileId } = req.query;
         if(!electionId && !profileId) {
-            console.log(req.params)
             return res.status(400).json("Bad Request");
         }
         const profiles = await Voter.find( { electionId }, {profileId: 1, hasRegistered: 1});
@@ -68,6 +77,86 @@ router.get('/registerVoters', async (req,res) => {
             })
         }));
         return res.status(200).send({profilesNamesRegistered})
+    } catch (e) {
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
+    }
+})
+
+router.get('/votedVoters', async (req,res) => {
+    try {
+        const  { electionId, profileId } = req.query;
+        if(!electionId && !profileId) {
+            return res.status(400).json("Bad Request");
+        }
+        const profiles = await Voter.find( { electionId,  hasVoted: true }, {profileId: 1, hasRegistered: 1});
+        console.log(profiles);
+        const profilesNamesVoted = await Promise.all(profiles.map((profile) =>{
+            return Profile.findOne({profileId: profile.profileId}, {name: 1}).then(res => {
+                return { name: res.name};
+            })
+        }));
+        return res.status(200).send({profilesNamesVoted})
+    } catch (e) {
+        console.log(`Exception caught --------> ${e}`)
+        return res.status(500).send(e);
+    }
+})
+router.get('/getResults', async (req,res) => {
+    try {
+        const  { electionId } = req.query;
+        if(!electionId) {
+            return res.status(400).json("Bad Request");
+        }
+        const election = await Election.findOne( {electionId}, { electionTitle: 1,questions: 1, collectors: 1 }).lean();
+        const voters = await Voter.find( { electionId, hasVoted: 1 }, {questionsVotedOn: 1});
+        const collectors =  await Promise.all(election?.collectors?.map(async (id) => {
+            return await Collector.findOne({collectorId: id}, {url: 1});
+        }));
+
+        const collectorResults = await Promise.all(collectors.map(({url}) => {
+            return axios.post(`${url}/getAllShares`, {electionId}).then(res => res.data);
+        }));
+
+        voters.forEach((voter) => {
+            if (voter?.questionsVotedOn) {
+                voter.questionsVotedOn.forEach((question) => {
+                    const currentQuestion = election.questions.find((q) => q._id.equals(question.questionId));
+                    if (currentQuestion) {
+                        if (!currentQuestion.forwardBallot ) {
+                            currentQuestion.forwardBallot  = question.forwardBallot ;
+                            console.log('hit does not exist', currentQuestion,question.forwardBallot  )
+                        } else {
+                            currentQuestion.forwardBallot  = `${BigInt(currentQuestion.forwardBallot ) + BigInt(question.forwardBallot )}`;
+                            console.log('hit does exist', currentQuestion,question.forwardBallot  )
+                        }
+                        if (!currentQuestion.reverseBallot) {
+                            currentQuestion.reverseBallot = question.reverseBallot;
+
+                        } else {
+                            currentQuestion.reverseBallot =  `${BigInt(currentQuestion.reverseBallot) + BigInt(question.reverseBallot)}`;
+                        }
+                    } else {
+                        throw new Error('Could not tally results');
+                    } 
+                });
+            }
+        })
+        election.questions = election.questions.map((question) => {
+            const forwardBallot = collectorResults.reduce((prev, res) => {
+                return prev -  BigInt(res.questions[question._id].fowardShare);
+            }, BigInt(question.forwardBallot)).toString();
+            const reverseBallot = collectorResults.reduce((prev, res) => {
+                return prev -  BigInt(res.questions[question._id].reverseShare);
+            }, BigInt(question.reverseBallot)).toString();
+            return {
+                ...question,
+                forwardBallot,
+                reverseBallot
+            }
+        })
+
+        return res.status(200).send({election})
     } catch (e) {
         console.log(`Exception caught --------> ${e}`)
         return res.status(500).send(e);

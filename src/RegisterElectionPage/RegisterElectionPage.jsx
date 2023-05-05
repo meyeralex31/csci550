@@ -18,7 +18,7 @@ const RegisterElectionPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { profileId } = useUser();
-  const { registered, status, questions, title, setRegistered } =
+  const { registered, status, questions, title, setRegistered, hasVoted } =
     useElectionContext();
 
   return (
@@ -37,7 +37,11 @@ const RegisterElectionPage = () => {
           <Paper>
             <Grid container style={{ padding: "10px" }}>
               <Grid item xs={5} style={{ borderRight: "1px solid grey" }}>
-                <Status status={status} registered={registered} />
+                <Status
+                  status={status}
+                  registered={registered}
+                  hasVoted={hasVoted}
+                />
               </Grid>
               <Grid
                 item
@@ -58,11 +62,11 @@ const RegisterElectionPage = () => {
                 }}
               >
                 <RegisterButton
+                  disabled={status === VOTING_IN_PROGRESS_STATUS && hasVoted}
                   status={status}
                   registered={registered}
                   onClick={() => {
                     if (status === REGISTRATION_STATUS) {
-                      console.log("registration status changed");
                       axios
                         .post("http://localhost:8080/registerVoter", {
                           profileId,

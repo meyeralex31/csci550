@@ -1,146 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import { useNavigate } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
-
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import TabPanel from "@mui/lab/TabPanel";
+import TabContext from "@mui/lab/TabContext";
+import { BallotDisplay } from "./BallotDisplay";
+import { useResultsContext } from "../Context/ResultsContext";
 const Results = () => {
-  const title = "Title";
-  const questions = [
-    {
-      question: "Which fruits do you prefer?",
-      number: 1,
-      options: ["Apple", "Mango"],
-      results: [
-        { name: "Apple", votes: 3 },
-        { name: "Mango", votes: 5 },
-      ],
-    },
-    {
-      question: "Which animals do you prefer?",
-      options: ["Dog", "Cat"],
-      number: 2,
-      results: [
-        { name: "Dog", votes: 8 },
-        { name: "Cat", votes: 0 },
-      ],
-    },
-    {
-      question: "Which fruits do you prefer?",
-      options: ["Apple", "Mango"],
-      number: 3,
-      results: [
-        { name: "Apple", votes: 3 },
-        { name: "Mango", votes: 5 },
-      ],
-    },
-    {
-      question: "Which animals do you prefer?",
-      options: ["Dog", "Cat"],
-      number: 4,
-      results: [
-        { name: "Dog", votes: 8 },
-        { name: "Cat", votes: 0 },
-      ],
-    },
-    {
-      question: "Which fruits do you prefer?",
-      options: ["Apple", "Mango"],
-      number: 5,
-      results: [
-        { name: "Apples", votes: 3 },
-        { name: "Mango", votes: 5 },
-      ],
-    },
-    {
-      question: "Which animals do you prefer?",
-      options: ["Dog", "Cat"],
-      number: 6,
-      results: [
-        { name: "Dog", votes: 8 },
-        { name: "Cat", votes: 0 },
-      ],
-    },
-  ];
+  const { title, questions, ballotVoted, reverseBallotVoted } =
+    useResultsContext();
+  const [tabValue, setTabValue] = useState(0);
 
-  const ballots = [
-    {
-      location: 1,
-      votes: [
-        { vote: "Apple", question: questions[0] },
-        { vote: "Dog", question: questions[1] },
-        { vote: "Apple", question: questions[2] },
-        { vote: "Dog", question: questions[3] },
-        { vote: "Apple", question: questions[4] },
-        { vote: "Dog", question: questions[5] },
-      ],
-    },
-    {
-      location: 2,
-      votes: [
-        { vote: "Mango", question: questions[0] },
-        { vote: "Dog", question: questions[1] },
-        { vote: "Mango", question: questions[2] },
-        { vote: "Dog", question: questions[3] },
-        { vote: "Mango", question: questions[4] },
-        { vote: "Dog", question: questions[5] },
-      ],
-    },
-    {
-      location: 3,
-      votes: [
-        { vote: "Mango", question: questions[0] },
-        { vote: "Dog", question: questions[1] },
-        { vote: "Mango", question: questions[2] },
-        { vote: "Dog", question: questions[3] },
-        { vote: "Mango", question: questions[4] },
-        { vote: "Dog", question: questions[5] },
-      ],
-    },
-    {
-      location: 4,
-      votes: [
-        { vote: "Apple", question: questions[0] },
-        { vote: "Dog", question: questions[1] },
-        { vote: "Apple", question: questions[2] },
-        { vote: "Dog", question: questions[3] },
-        { vote: "Apple", question: questions[4] },
-        { vote: "Dog", question: questions[5] },
-      ],
-    },
-    {
-      location: 5,
-      votes: [
-        { vote: "Apple", question: questions[0] },
-        { vote: "Dog", question: questions[1] },
-        { vote: "Apple", question: questions[2] },
-        { vote: "Dog", question: questions[3] },
-        { vote: "Apple", question: questions[4] },
-        { vote: "Dog", question: questions[5] },
-      ],
-    },
-    {
-      location: 6,
-      votes: [
-        { vote: "Mango", question: questions[0] },
-        { vote: "Dog", question: questions[1] },
-        { vote: "Mango", question: questions[2] },
-        { vote: "Dog", question: questions[3] },
-        { vote: "Mango", question: questions[4] },
-        { vote: "Dog", question: questions[5] },
-      ],
-    },
-  ];
-  const navigate = useNavigate();
-
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  useEffect(() => {
-    if (!searchParams.get("id")) {
-      alert("No election id given returning to home page");
-      navigate("/");
-    }
-  }, []);
   return (
     <div
       style={{
@@ -159,19 +30,17 @@ const Results = () => {
               <Grid item xs={12} style={{ textAlign: "center" }}>
                 Winners
               </Grid>
-              {questions.map((question, index) => {
+              {questions?.map((question, index) => {
                 // TODO handle ties
-                const winner = question.results.reduce((prevMax, result) =>
-                  prevMax.votes > result.votes ? prevMax : result
-                );
+                const winner = question?.options?.[question.choosenIndex];
                 return (
                   <Grid item xs={4} key={index} style={{ textAlign: "center" }}>
                     <Paper style={{ height: "100%", width: "100%" }}>
                       <h5>
-                        {question.number}. {question.question}
+                        {index + 1}. {question?.question}
                       </h5>
                       <div>
-                        {winner.name} ({winner.votes})
+                        {winner?.option} ({winner?.total})
                       </div>
                     </Paper>
                   </Grid>
@@ -184,26 +53,27 @@ const Results = () => {
         <Grid item xs={12}>
           <Paper style={{ paddingBottom: "25px" }}>
             <Grid container style={{ padding: "10px" }} spacing={2}>
-              <Grid item xs={12} style={{ textAlign: "center" }}>
-                Ballots
-              </Grid>
-              {ballots.map((ballot) => (
-                <Grid
-                  item
-                  xs={4}
-                  key={ballot.location}
-                  style={{ textAlign: "center" }}
+              <Grid item xs={12}>
+                <Tabs
+                  value={tabValue}
+                  onChange={(_, newValue) => setTabValue(newValue)}
                 >
-                  <Paper style={{ height: "100%", width: "100%" }}>
-                    <h5>Ballot {ballot.location}</h5>
-                    {ballot.votes.map((vote) => (
-                      <div>
-                        {vote.question.number}. {vote.vote}
-                      </div>
-                    ))}
-                  </Paper>
-                </Grid>
-              ))}
+                  <Tab label="Foward Ballot" />
+                  <Tab label="Reverse Ballot" />
+                </Tabs>
+                <TabContext value={tabValue}>
+                  <TabPanel value={0} style={{ maxHeight: "320px" }}>
+                    <Grid container style={{ padding: "10px" }} spacing={2}>
+                      <BallotDisplay ballots={ballotVoted} />
+                    </Grid>
+                  </TabPanel>
+                  <TabPanel value={1} style={{ maxHeight: "320px" }}>
+                    <Grid container style={{ padding: "10px" }} spacing={2}>
+                      <BallotDisplay ballots={reverseBallotVoted} />
+                    </Grid>
+                  </TabPanel>
+                </TabContext>
+              </Grid>
             </Grid>
           </Paper>
         </Grid>

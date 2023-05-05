@@ -19,28 +19,85 @@ import RadioGroup from "@mui/material/RadioGroup";
 import BallotIcon from "@mui/icons-material/Ballot";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import { useElectionContext } from "./Context/ElectionContext";
+import { useSharesContext } from "./Context/SharesContext";
+
+import { VOTING_IN_PROGRESS_STATUS } from "./PublicElectionPage";
+import axios from "axios";
+import { useUser } from "./Context/UserContext";
+/* global BigInt */
 
 const VotingPage = () => {
-  const title = "Title";
   const [showVotingLocation, setShowVotingLocation] = useState(false);
-  const questions = [
-    { question: "Which fruits do you prefer?", options: ["Apple", "Mango"] },
-    { question: "Which animals do you prefer?", options: ["Dog", "Cat"] },
-    { question: "Which fruits do you prefer?", options: ["Apple", "Mango"] },
-    { question: "Which animals do you prefer?", options: ["Dog", "Cat"] },
-    { question: "Which fruits do you prefer?", options: ["Apple", "Mango"] },
-    { question: "Which animals do you prefer?", options: ["Dog", "Cat"] },
-  ];
-
+  const { isElectionOwner, status, questions, title, totalVoters } =
+    useElectionContext();
+  const { profileId } = useUser();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  // this structure is { [electionId]: answer }
+  const [answers, setAnswers] = useState({});
+  const [allAnswersMade, setAllAnswersMade] = useState(false);
+
+  const { location, questionShares } = useSharesContext();
+  // end
+  const redirect = () => {
+    if (isElectionOwner) {
+      navigate("/startElection?id=" + searchParams.get("id"));
+    } else {
+      navigate("/registerElection?id=" + searchParams.get("id"));
+    }
+  };
+  const sumbit = () => {
+    // will look like v, p, vPrime, and pPrime
+    const itemToSumbit = questions.map((question) => {
+      const answerID = answers[question._id];
+      const shares = questionShares[question._id];
+      const indexOfAnswer = BigInt(
+        question.options.findIndex((option) => option._id === answerID)
+      );
+      if (indexOfAnswer < 0n) {
+        console.error("cant find option or answer");
+        return {};
+      }
+      const optionsCount = BigInt(question.options.length);
+
+      const powerV = location * optionsCount + indexOfAnswer;
+      const v = 2n ** powerV;
+      const p = v + shares.fowardShare;
+      const powerVPrime =
+        (totalVoters - location - 1n) * optionsCount +
+        (optionsCount - indexOfAnswer - 1n);
+      const vPrime = 2n ** powerVPrime;
+      const pPrime = vPrime + shares.reverseShare;
+      console.log({ shares, v, p, vPrime, pPrime });
+      return {
+        forwardBallot: p.toString(),
+        reverseBallot: pPrime.toString(),
+        questionId: question._id,
+      };
+    });
+    axios
+      .post("http://localhost:8080/vote", {
+        profileId,
+        electionId: searchParams.get("id"),
+        questionsVotedOn: itemToSumbit,
+      })
+      .then((res) => {
+        redirect();
+      });
+  };
+  useEffect(() => {
+    if (status !== "" && status !== VOTING_IN_PROGRESS_STATUS) redirect();
+  }, [status]);
 
   useEffect(() => {
-    if (!searchParams.get("id")) {
-      alert("No election id given returning to home page");
-      navigate("/");
-    }
-  }, []);
+    setAllAnswersMade(
+      questions.every((question) => {
+        return answers[question._id];
+      })
+    );
+  }, [answers, questions]);
+
   return (
     <div
       style={{
@@ -54,11 +111,12 @@ const VotingPage = () => {
           {title}
         </Grid>
         <Grid item xs={12}>
-          <Paper>
+          <Paper style={{ padding: "16px" }}>
             <List
               sx={{
-                width: "100%",
-                maxWidth: "100%",
+                width: "95%",
+                maxWidth: "95%",
+                margin: "16px",
                 position: "relative",
                 overflow: "auto",
                 maxHeight: "320px",
@@ -75,10 +133,16 @@ const VotingPage = () => {
                     <RadioGroup>
                       {question.options.map((option) => (
                         <FormControlLabel
-                          key={`section-${option}`}
-                          label={option}
-                          value={option}
+                          key={`section-${option.option}`}
+                          label={option.option}
+                          value={option.option}
                           control={<Radio />}
+                          onChange={(e) => {
+                            setAnswers((prev) => ({
+                              ...prev,
+                              [question._id]: option._id,
+                            }));
+                          }}
                         />
                       ))}
                     </RadioGroup>
@@ -98,11 +162,12 @@ const VotingPage = () => {
             >
               <Button
                 startIcon={<BallotIcon />}
+                disabled={!allAnswersMade}
                 variant="contained"
                 color="primary"
-                onClick={() =>
-                  navigate("/registerElection?id=" + searchParams.get("id"))
-                }
+                onClick={() => {
+                  sumbit();
+                }}
               >
                 Vote
               </Button>
@@ -126,7 +191,7 @@ const VotingPage = () => {
                 </InputLabel>
                 <OutlinedInput
                   disabled={true}
-                  value="6"
+                  value={`${location}`}
                   type={showVotingLocation ? "text" : "password"}
                   startAdornment={
                     <InputAdornment position="start">

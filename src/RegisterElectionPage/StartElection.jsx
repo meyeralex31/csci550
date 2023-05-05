@@ -10,22 +10,28 @@ import RegisterButton from "./RegisterButton";
 import TabPanel from "@mui/lab/TabPanel";
 import TabContext from "@mui/lab/TabContext";
 import Collectors from "./Collectors";
+import VotedTab from "./VotedTab";
 import RegisterVoters from "./RegisteredVoters";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StartVotingModal from "./StartVotingModal";
 import {
   REGISTRATION_STATUS,
   VOTING_IN_PROGRESS_STATUS,
+  VOTING_ENDED_STATUS,
 } from "../PublicElectionPage";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Context/UserContext";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { useElectionContext } from "../Context/ElectionContext";
+import StopCircleIcon from "@mui/icons-material/StopCircle";
+import CloseElectionModal from "./CloseElectionModal";
 
 const StartElection = () => {
   const [tabValue, setTabValue] = useState(0);
   const [startElectionModalOpen, setStartElectionModalOpen] = useState(false);
+  const [closeElectionModalOpen, setCloseElectionModalOpen] = useState(false);
+
   const [canStartElection, setCanStartElection] = useState(false);
 
   const navigate = useNavigate();
@@ -39,7 +45,9 @@ const StartElection = () => {
     setRegistered,
     setStatus,
     registedVoters,
+    hasVoted,
     collectorsSelectedIds,
+    profilesNamesVoted,
   } = useElectionContext();
   useEffect(() => {
     setCanStartElection(
@@ -75,6 +83,26 @@ const StartElection = () => {
           setStartElectionModalOpen(false);
         }}
       />
+
+      <CloseElectionModal
+        open={closeElectionModalOpen}
+        handleClose={() => {
+          setCloseElectionModalOpen(false);
+        }}
+        stopVoting={() => {
+          axios
+            .put("http://localhost:8080/updateElection", {
+              REGISTRATION_STATUS: VOTING_ENDED_STATUS,
+              profileId,
+              electionId: searchParams.get("id"),
+            })
+            .then(() => {
+              setStatus(VOTING_ENDED_STATUS);
+            })
+            .catch((e) => console.error(e));
+          setCloseElectionModalOpen(false);
+        }}
+      />
       <Grid style={{ width: "80%", maxHeight: "80%" }} container spacing={2}>
         <Grid item xs={12} style={{ textAlign: "center" }}>
           {title}
@@ -83,7 +111,11 @@ const StartElection = () => {
           <Paper>
             <Grid container style={{ padding: "10px" }}>
               <Grid item xs={5} style={{ borderRight: "1px solid grey" }}>
-                <Status status={status} registered={registered} />
+                <Status
+                  status={status}
+                  registered={registered}
+                  hasVoted={hasVoted}
+                />
               </Grid>
               <Grid
                 item
@@ -96,18 +128,29 @@ const StartElection = () => {
                 >
                   <Tab label="Collectors" />
                   <Tab label="Questions" />
-                  <Tab label="Register Voters" />
+                  {status === REGISTRATION_STATUS ? (
+                    <Tab label="Register Voters" />
+                  ) : (
+                    <Tab label="Voted Voters" />
+                  )}
                 </Tabs>
                 <TabContext value={tabValue}>
                   <TabPanel value={0} style={{ maxHeight: "320px" }}>
-                    <Collectors />
+                    <Collectors disabled={status !== REGISTRATION_STATUS} />
                   </TabPanel>
                   <TabPanel value={1} style={{ maxHeight: "320px" }}>
                     <Questions questions={questions} />
                   </TabPanel>
-                  <TabPanel value={2} style={{ maxHeight: "320px" }}>
-                    <RegisterVoters />
-                  </TabPanel>
+
+                  {status === REGISTRATION_STATUS ? (
+                    <TabPanel value={2} style={{ maxHeight: "320px" }}>
+                      <RegisterVoters />
+                    </TabPanel>
+                  ) : (
+                    <TabPanel value={2} style={{ maxHeight: "320px" }}>
+                      <VotedTab />
+                    </TabPanel>
+                  )}
                 </TabContext>
               </Grid>
               <Grid
@@ -130,6 +173,7 @@ const StartElection = () => {
                   }}
                 >
                   <RegisterButton
+                    disabled={status === VOTING_IN_PROGRESS_STATUS && hasVoted}
                     registered={registered}
                     status={status}
                     onClick={() => {
@@ -147,10 +191,34 @@ const StartElection = () => {
                           });
                       } else if (status === VOTING_IN_PROGRESS_STATUS) {
                         navigate("/VotingPage?id=" + searchParams.get("id"));
+                      } else {
+                        navigate("/results?id=" + searchParams.get("id"));
                       }
                     }}
                   />
                 </Grid>
+                {status === VOTING_IN_PROGRESS_STATUS && (
+                  <Grid
+                    item
+                    xs={6}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Button
+                      startIcon={<StopCircleIcon />}
+                      style={{ marginRight: "auto", marginLeft: "auto" }}
+                      variant="contained"
+                      color="warning"
+                      onClick={() => setCloseElectionModalOpen(true)}
+                      disabled={profilesNamesVoted.length <= 2}
+                    >
+                      Close Voting
+                    </Button>
+                  </Grid>
+                )}
                 {status === REGISTRATION_STATUS && (
                   <Grid
                     item

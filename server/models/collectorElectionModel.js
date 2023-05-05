@@ -2,22 +2,20 @@ const mongoose = require('mongoose');
 
 const collectorSchema = mongoose.Schema (
     {   
-        url : {
-            type: String,
-            // required: true
-        },
         collectorId : {
             type: mongoose.Schema.Types.ObjectId
         },
-        name: {
+        electionId : {
             type: String,
-            required: true
         },
+        privateKey : {
+            type: String
+        }
     }, {
         timestamps: true,
     }
 )
 
-const collector = mongoose.model("Collectors", collectorSchema);
+const collectorElectionModel = mongoose.model("CollectorElectionModel", collectorSchema);
 
-module.exports = collector;
+module.exports = collectorElectionModel;

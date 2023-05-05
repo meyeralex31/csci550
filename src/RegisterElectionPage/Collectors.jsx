@@ -6,7 +6,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import axios from "axios";
 import { useElectionContext } from "../Context/ElectionContext";
-const Collectors = () => {
+const Collectors = ({ disabled }) => {
   const { setCollectorsSelectedIds, collectorsSelectedIds } =
     useElectionContext();
   const [collectors, setCollectors] = useState([]);
@@ -29,7 +29,9 @@ const Collectors = () => {
       }}
       subheader={<li />}
     >
-      <ListSubheader>Choose atleast 2 Collectors</ListSubheader>
+      <ListSubheader>
+        {disabled ? "Collectors" : "Choose atleast 2 Collectors"}
+      </ListSubheader>
       {collectors?.map((collector) => {
         const checked = collectorsSelectedIds?.includes(collector.collectorId);
         return (
@@ -40,6 +42,7 @@ const Collectors = () => {
               control={
                 <Checkbox
                   checked={checked}
+                  disabled={disabled}
                   onClick={() => {
                     setCollectorsSelectedIds((ids) => {
                       if (checked) {
