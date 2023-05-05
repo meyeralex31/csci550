@@ -39,7 +39,7 @@ router.post('/verify',async (req,res) => {
             let reverseShare = []
             vshares.push(question.forwardBallot)
             vprimeShares.push(question.reverseBallot)
-            let { data } = await axios.post(`http://localhost:${ports[index]}/getAllShares`, {electionId, voterId, questionId: question.questionId })
+            let { data } = await axios.post(`http://localhost:${ports[index]}/validate`, {electionId, voterId, questionId: question.questionId })
             forwardShare.push(data.resp[0].secretShares[0].fowardShare)
             reverseShare.push(data.resp[0].secretShares[0].reverseShare)
             await verifyVoterLocation(forwardShare,reverseShare,vshares,vprimeShares)

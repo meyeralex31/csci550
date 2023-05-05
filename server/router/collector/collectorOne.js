@@ -82,6 +82,17 @@ const generateRouter = (collectorId) => {
         }
     })
 
+    router.post('/validate',async (req,res) => {
+        const  { electionId, voterId , questionId } = req.body;
+        try {
+            let resp = await collectorProfileModel.find({'secretShares.0.questionId': questionId, electionId , voterId}, {secretShares : 1})
+            console.log(resp)
+            return res.json({"type": "SUCCESS", resp})
+        } catch (err) {
+            console.log(`Exception caught --------> ${err}`)
+            return res.status(500).send(err);
+      
+
     router.post('/generateShares', async (req,res) => {
         try {
             const { step, electionId, questions, voters } = req.body;

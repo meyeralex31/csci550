@@ -81,6 +81,7 @@ router.post('/displayElections', async (req,res) => {
     }
 })
 
+
 //Display available Elections
 router.post('/getElection', async (req,res) => {
     const electionId = req.body.electionId;
