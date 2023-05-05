@@ -87,7 +87,7 @@ const generateRouter = (collectorId) => {
         } catch (err) {
             console.log(`Exception caught --------> ${err}`)
             return res.status(500).send(err);
-      
+        }});
 
     router.post('/generateShares', async (req,res) => {
         try {
@@ -159,7 +159,7 @@ const generateRouter = (collectorId) => {
             return res.status(500).send(err);
         }
     })
-    return router
+    return router;
 }
 
 module.exports = generateRouter;
